@@ -28,6 +28,7 @@ A plataforma conta com múltiplos agentes especializados que trabalham juntos:
 ### 📋 Kanban
 
 Quadro visual de tarefas com colunas:
+
 - **A Fazer** (todo)
 - **Em Andamento** (in_progress)
 - **Em Revisão** (review)
@@ -38,6 +39,7 @@ Prioridades: Urgente → Alta → Média → Baixa
 ### 📄 Contratos
 
 Gestão completa de contratos com:
+
 - Tipos: NDA, Serviço, Parceria, Outro
 - Status: Rascunho → Ativo → Expirado → Encerrado
 - Busca semântica para encontrar contratos relacionados
@@ -45,6 +47,7 @@ Gestão completa de contratos com:
 ### 💰 Financeiro
 
 Controle de receitas e despesas com:
+
 - Categorias personalizáveis
 - Relatórios por período
 - Vinculação a contratos e tarefas
@@ -140,10 +143,12 @@ Para desenvolvedores:
 
 ## Equipe
 
-- **Lucas Drummond** - CEO / Desenvolvedor
+- **Lucas Drummond** - Desenvolvedor
 - **Matheus Guim** - Desenvolvedor
 - **Luca Junqueira** - Desenvolvedor
 - **João Pedro Santana** - Desenvolvedor
+- **Gabriel Fonseca** - Desenvolvedor
+- **Guilherme Sad** - Desenvolvedor
 
 ---
 
