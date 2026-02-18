@@ -1,0 +1,7 @@
+.env
+*.pem
+*.key
+credentials/
+*.log
+/tmp/
+telemetry-id

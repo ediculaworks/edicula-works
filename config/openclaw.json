@@ -1,0 +1,90 @@
+{
+  "gateway": {
+    "mode": "local",
+    "bind": "loopback",
+    "port": 18789,
+    "auth": {
+      "mode": "password",
+      "password": "CHANGE_ME_IN_PRODUCTION",
+      "allowTailscale": true
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "~/.openclaw/workspace",
+      "model": {
+        "primary": "openrouter/anthropic/claude-3-haiku",
+        "fallbacks": [
+          "openrouter/google/gemini-2.0-flash-001",
+          "openrouter/meta-llama/llama-3.1-8b-instruct"
+        ]
+      },
+      "systemPrompt": "Você é o assistente IA da EdiculaWorks, uma empresa de tecnologia especializada em desenvolvimento de software. Ajude a equipe com tarefas de desenvolvimento, automação, dúvidas técnicas e gestão de projetos."
+    },
+    "list": [
+      {
+        "id": "chief",
+        "name": "Chief",
+        "workspace": "~/.openclaw/workspace/chief",
+        "systemPrompt": "Você é o Chief da EdiculaWorks. Coordena todos os outros agentes e toma decisões estratégicas. Analisa informações de todos os departamentos e fornece direcionamento geral."
+      },
+      {
+        "id": "tech",
+        "name": "Tech Lead",
+        "workspace": "~/.openclaw/workspace/tech",
+        "systemPrompt": "Você é o Tech Lead da EdiculaWorks. Especializado em desenvolvimento de software, infraestrutura, DevOps e questões técnicas. Ajuda com código, arquitetura e automação."
+      },
+      {
+        "id": "gestao",
+        "name": "Gestão",
+        "workspace": "~/.openclaw/workspace/gestao",
+        "systemPrompt": "Você é o agente de Gestão da EdiculaWorks. Gerencia tarefas, projetos e kanban. Ajuda a organizar o trabalho da equipe."
+      },
+      {
+        "id": "financeiro",
+        "name": "Financeiro",
+        "workspace": "~/.openclaw/workspace/financeiro",
+        "systemPrompt": "Você é o agente Financeiro da EdiculaWorks. Gerencia custos, contratos e análises financeiras. Ajuda a controlar despesas e otimizar custos."
+      },
+      {
+        "id": "security",
+        "name": "Security",
+        "workspace": "~/.openclaw/workspace/security",
+        "systemPrompt": "Você é o Security Lead da EdiculaWorks. Especializado em segurança, privacidade e conformidade. Analisa riscos e propõe soluções de proteção."
+      },
+      {
+        "id": "ops",
+        "name": "Ops",
+        "workspace": "~/.openclaw/workspace/ops",
+        "systemPrompt": "Você é o Ops Lead da EdiculaWorks. Especializado em monitoramento, backup, manutenção e operações. Garante que os sistemas funcionem corretamente."
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "chief",
+      "match": {
+        "channel": "web"
+      }
+    }
+  ],
+  "channels": {
+    "telegram": {
+      "enabled": false,
+      "dmPolicy": "pairing"
+    },
+    "discord": {
+      "enabled": false,
+      "dmPolicy": "pairing"
+    },
+    "whatsapp": {
+      "enabled": false,
+      "dmPolicy": "pairing"
+    }
+  },
+  "tools": {
+    "browser": {
+      "enabled": false
+    }
+  }
+}

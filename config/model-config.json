@@ -1,0 +1,60 @@
+{
+  "models": {
+    "default": "openrouter/anthropic/claude-3-haiku",
+    "providers": [
+      {
+        "name": "openrouter",
+        "apiKey": "${OPENROUTER_API_KEY}",
+        "priority": 1
+      }
+    ],
+    "fallbackChain": [
+      {
+        "model": "openrouter/anthropic/claude-3-haiku",
+        "costPerM": { "input": 0.08, "output": 0.40 },
+        "description": "Padrão - bom equilíbrio",
+        "useFor": "general"
+      },
+      {
+        "model": "openrouter/google/gemini-2.0-flash-001",
+        "costPerM": { "input": 0.00, "output": 0.00 },
+        "description": "GRÁTIS - 200 req/dia",
+        "useFor": "backup"
+      },
+      {
+        "model": "openrouter/meta-llama/llama-3.1-8b-instruct",
+        "costPerM": { "input": 0.05, "output": 0.40 },
+        "description": "Barato - código",
+        "useFor": "code"
+      },
+      {
+        "model": "openrouter/google/gemini-pro-1.5-flash",
+        "costPerM": { "input": 0.00, "output": 0.00 },
+        "description": "Grátis - contexto longo",
+        "useFor": "analysis"
+      }
+    ],
+    "routing": {
+      "simple": "haiku",
+      "code": "llama-3.1-8b",
+      "analysis": "gemini-flash",
+      "backup": "gemini-2.0-flash"
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 3600,
+    "maxSize": "100mb"
+  },
+  "limits": {
+    "maxTokens": 2048,
+    "maxHistory": 50,
+    "maxRequestsPerMinute": 60
+  },
+  "optimization": {
+    "autoSummary": true,
+    "summaryThreshold": 20,
+    "compressPrompts": true,
+    "streamResponses": true
+  }
+}
