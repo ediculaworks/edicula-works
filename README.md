@@ -1,12 +1,14 @@
-# EdiculaWorks
+# Sistema Interno EdiculaWorks
 
-Plataforma de gestão empresarial inteligente com agentes de IA, desenvolvida pela equipe EdiculaWorks.
+Sistema de gestão empresarial inteligente com agentes de IA, desenvolvido internamente pela equipe EdiculaWorks.
+
+> **Nota**: Este sistema ainda não tem um nome definido. Fique à vontade para sugerir!
 
 ---
 
-## O que é a EdiculaWorks?
+## O que é este sistema?
 
-A EdiculaWorks é uma plataforma completa para gestão de tarefas, contratos e projetos, potencializada por inteligência artificial.Think of it as um assistente virtual que ajuda a equipe com organização, análise financeira, gestão de contratos e muito mais.
+É uma plataforma completa para gestão de tarefas, contratos e projetos da empresa, potencializada por inteligência artificial. Think of it as um assistente virtual que ajuda a equipe com organização, análise financeira, gestão de contratos e muito mais.
 
 ---
 

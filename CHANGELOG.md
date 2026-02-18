@@ -8,12 +8,10 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
-## [2.2.0] - 2026-02-18
+## [2.2.1] - 2026-02-18
 
 ### Modificado
-- README.md reescrito focado em explicação para equipe (menos comandos técnicos)
-- Removidos valores de custos (a definir posteriormente)
-- OTIMIZACAO.md atualizado sem valores específicos
+- README.md: clarificado que EdiculaWorks é a empresa, não a plataforma (sistema ainda sem nome)
 
 ---
 

@@ -1,8 +1,8 @@
-# Otimização - EdiculaWorks
+# Otimização - Sistema Interno
 
 ## Visão Geral
 
-Este documento detalha estratégias para otimizar performance e recursos.
+Este documento detalha estratégias para otimizar performance e recursos do sistema.
 
 ---
 
