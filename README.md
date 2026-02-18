@@ -1,288 +1,156 @@
-# EdiculaWorks - Infraestrutura VPS Segura
+# EdiculaWorks
 
-## Visão Geral
+Plataforma de gestão empresarial inteligente com agentes de IA, desenvolvida pela equipe EdiculaWorks.
 
-Infraestrutura auto-hospedada e segura para a empresa EdiculaWorks, centrada no assistente de IA OpenClaw com acesso remoto seguro via Tailscale.
+---
 
-## Stack de Serviços
+## O que é a EdiculaWorks?
 
-| Serviço | Descrição | Porta |
-|---------|-----------|-------|
-| OpenClaw | Assistente de IA | 18789 (interno) |
-| Tailscale | VPN/Acesso remoto | - |
-| Nginx | Proxy reverso + SSL | 80/443 |
-| UFW | Firewall | - |
-| Fail2Ban | Proteção brute force | - |
+A EdiculaWorks é uma plataforma completa para gestão de tarefas, contratos e projetos, potencializada por inteligência artificial.Think of it as um assistente virtual que ajuda a equipe com organização, análise financeira, gestão de contratos e muito mais.
 
-## Arquitetura de Segurança
+---
+
+## Funcionalidades
+
+### 🤖 Agentes Inteligentes
+
+A plataforma conta com múltiplos agentes especializados que trabalham juntos:
+
+| Agente | Função |
+|--------|--------|
+| **Chief** | Coordenador geral - direciona suas solicitações para o agente certo |
+| **Tech Lead** | Ajuda com código, infraestrutura e questões técnicas |
+| **Gestao Lead** | Gerencia tarefas, projetos e o quadro Kanban |
+| **Financeiro Lead** | Analisa custos, controla orçamento e gerencia contratos |
+| **Security Lead** | Cuida da segurança e conformidade |
+| **Ops Lead** | Monitoramento, backup e manutenção |
+
+### 📋 Kanban
+
+Quadro visual de tarefas com colunas:
+- **A Fazer** (todo)
+- **Em Andamento** (in_progress)
+- **Em Revisão** (review)
+- **Concluída** (done)
+
+Prioridades: Urgente → Alta → Média → Baixa
+
+### 📄 Contratos
+
+Gestão completa de contratos com:
+- Tipos: NDA, Serviço, Parceria, Outro
+- Status: Rascunho → Ativo → Expirado → Encerrado
+- Busca semântica para encontrar contratos relacionados
+
+### 💰 Financeiro
+
+Controle de receitas e despesas com:
+- Categorias personalizáveis
+- Relatórios por período
+- Vinculação a contratos e tarefas
+
+### 🔍 Busca Semântica
+
+Sistema inteligente que encontra tarefas e contratos relacionados, mesmo usando palavras diferentes. Ex: busca por "problema com pagamento" encontra contratos de pagamento.
+
+---
+
+## Arquitetura
 
 ```
-INTERNET
-    │
-    ▼
 ┌─────────────────────────────┐
-│      FIREWALL (UFW)         │
-│  - 80/443 (HTTP/HTTPS)     │
-│  - 22 (SSH limitado)       │
-│  - 41641 (Tailscale)       │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│      NGINX + SSL           │
-│  - Rate limiting           │
-│  - Headers de segurança    │
-│  - HSTS                   │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│      FAIL2BAN              │
-│  - Bloqueio automático    │
-│  - Proteção SSH           │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│      OPENCLAW              │
-│  - Usuário dedicado       │
-│  - Modo sandbox           │
-│  - Comandos restritos     │
+│      Aplicação Web         │
+│     (Next.js - Futuro)     │
+└─────────────┬───────────────┘
+              │
+┌─────────────▼───────────────┐
+│        API (FastAPI)        │
+│   BACKEND + AGENTES IA      │
+└─────────────┬───────────────┘
+              │
+┌─────────────▼───────────────┐
+│      Supabase               │
+│  (PostgreSQL + pgVector)    │
 └─────────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│      TAILSCALE             │
-│  - Rede VPN privada       │
-│  - Acesso seguro          │
-└─────────────────────────────┘
 ```
 
-## Recursos de Segurança
+### Stack Tecnológica
 
-- ✅ Firewall UFW com políticas restritivas
-- ✅ SSH com chave pública (porta 2222)
-- ✅ Fail2Ban contra brute force
-- ✅ SSL Let's Encrypt com HSTS
-- ✅ Rate limiting no Nginx
-- ✅ Headers de segurança (CSP, XSS, etc)
-- ✅ OpenClaw com usuário dedicado
-- ✅ Modo sandbox (Docker)
-- ✅ Backup criptografado (GPG)
-- ✅ Monitoramento com alertas
-- ✅ API keys em variáveis de ambiente
+- **Frontend**: Next.js (em desenvolvimento)
+- **Backend**: FastAPI (Python)
+- **Banco de Dados**: Supabase (PostgreSQL + pgVector)
+- **IA**: OpenClaw com OpenRouter
+- **Infraestrutura**: VPS Ubuntu + Docker
 
-## Requisitos
+---
 
-- VPS: 4GB RAM, 2 CPU, 50GB SSD
-- Sistema: Ubuntu 22.04 LTS
-- Domínio configurado
+## Como Usar
 
-## Quick Start
+### Falando com os Agentes
 
-```bash
-# Clone o repositório
-git clone https://github.com/ediculaworks/infra.git
-cd infra
+Você pode interagir com os agentes de diferentes formas:
 
-# Execute o instalador
-chmod +x install-all.sh
-sudo ./install-all.sh
-```
+1. **Via Chat Web** (quando disponível)
+2. **Via Terminal** (acesso SSH)
+3. **Via Tailscale** (acesso remoto seguro)
 
-## Instalação Manual
+### Exemplos de Comandos
 
-```bash
-# 1. Docker
-chmod +x scripts/install-docker.sh
-sudo ./scripts/install-docker.sh
+| O que você quer | Agent |
+|-----------------|-------|
+| "Crie uma tarefa para o Lucas" | Gestao Lead |
+| "Liste minhas tarefas de hoje" | Gestao Lead |
+| "Quanto gastamos em janeiro?" | Financeiro Lead |
+| "Revise o contrato X" | Financeiro Lead |
+| "Ajude com um script Python" | Tech Lead |
+| "Verifique a segurança do servidor" | Security Lead |
 
-# 2. Firewall
-chmod +x scripts/install-firewall.sh
-sudo ./scripts/install-firewall.sh
+---
 
-# 3. SSH Hardening
-chmod +x scripts/install-ssh-hardening.sh
-sudo ./scripts/install-ssh-hardening.sh
+## Segurança
 
-# 4. OpenClaw
-chmod +x scripts/install-openclaw.sh
-sudo ./scripts/install-openclaw.sh
+- 🔒 Criptografia de dados
+- 🔑 Autenticação por chave SSH
+- 🛡️ Firewall e Fail2Ban
+- 📦 Ambiente sandbox (Docker)
+- 💾 Backup criptografado diário
+- 🌐 Acesso via VPN (Tailscale)
 
-# 5. SSL
-chmod +x scripts/setup-ssl.sh
-sudo ./scripts/setup-ssl.sh dominio.com email@exemplo.com
-```
-
-## Estrutura do Projeto
-
-```
-.
-├── README.md                    # Este arquivo
-├── AGENTS.md                   # Configuração do agente
-├── SOUL.md                     # Personalidade do agente
-├── TOOLS.md                    # Ferramentas customizadas
-├── CHANGELOG.md               # Histórico de mudanças
-├── REGRAS.md                  # Regras de desenvolvimento
-├── docker-compose.yml          # Orquestração Docker
-├── .env.example               # Template de variáveis
-├── api/                       # Backend FastAPI
-│   ├── routes/
-│   ├── services/
-│   └── schemas/
-├── agents/                    # Documentação dos agentes
-├── config/                    # Configurações
-├── docs/
-│   ├── infra/                # Infraestrutura VPS
-│   │   ├── arquitetura.md
-│   │   ├── seguranca.md
-│   │   ├── backup.md
-│   │   └── tailscale.md
-│   ├── platform/             # Plataforma
-│   │   ├── BLUEPRINT.md
-│   │   ├── DATABASE.md
-│   │   └── COMUNICACAO.md
-│   ├── CHECKLIST.md
-│   ├── TROUBLESHOOTING.md
-│   ├── TUTORIAL-*.md
-│   └── *.md
-├── scripts/                   # Scripts de instalação
-├── skills/                    # Skills reutilizáveis
-└── workspace/                # Configuração OpenClaw
-    ├── chief/
-    ├── tech/
-    ├── gestao/
-    ├── financeiro/
-    ├── security/
-    └── ops/
-```
-│   ├── install-docker.sh      # Instalador Docker
-│   ├── install-firewall.sh   # Firewall UFW
-│   ├── install-ssh-hardening.sh  # SSH seguro
-│   ├── install-openclaw.sh   # Instalador OpenClaw
-│   ├── install-tailscale.sh  # Instalador Tailscale
-│   ├── install-monitoring.sh  # Monitoramento
-│   ├── install-logrotate.sh  # Rotação de logs
-│   ├── install-fail2ban.sh   # Fail2Ban customizado
-│   ├── install-supabase.sh   # Integração Supabase
-│   ├── install-lynis.sh     # Auditoria Lynis
-│   ├── setup-ssl.sh          # SSL + Nginx seguro
-│   ├── update.sh             # Atualizador
-│   ├── backup.sh             # Backup criptografado
-│   ├── restore.sh            # Restore seguro
-│   ├── audit.sh              # Auditoria de segurança
-│   └── test-restore.sh       # Teste de restauração
-└── config/
-    ├── openclaw.json          # Configuração OpenClaw
-    ├── nginx.conf            # Configuração Nginx
-    ├── model-config.json     # Modelos e fallback
-    ├── logrotate/            # Configuração logrotate
-    └── fail2ban/             # Configuração Fail2Ban
-```
-
-## Configuração
-
-### 1. Variáveis de Ambiente
-
-```bash
-# /etc/openclaw/env
-OPENROUTER_API_KEY=sua_api_key_aqui
-```
-
-### 2. Configuração OpenClaw
-
-Edite `/etc/openclaw/openclaw.json`:
-
-```json
-{
-  "gateway": {
-    "auth": {
-      "password": "SENHA_SEGURA_AQUI"
-    }
-  }
-}
-```
-
-## Comandos Úteis
-
-```bash
-# Status dos serviços
-systemctl status openclaw
-systemctl status nginx
-systemctl status fail2ban
-
-# Logs
-journalctl -u openclaw -f
-tail -f /var/log/nginx/access.log
-tail -f /var/log/fail2ban.log
-
-# Health check
-/opt/monitoring/health-check.sh
-
-# Métricas
-/opt/monitoring/metrics.sh
-
-# Backup manual
-/opt/scripts/backup.sh
-
-# Restore
-/opt/scripts/restore.sh 20240115_030000
-```
-
-## Documentação
-
-- [Arquitetura](docs/arquitetura.md)
-- [OpenClaw](docs/openclaw.md)
-- [Tailscale](docs/tailscale.md)
-- [Backup](docs/backup.md)
-- [Segurança](docs/seguranca.md)
-- [CHECKLIST](docs/CHECKLIST.md)
-- [TROUBLESHOOTING](docs/TROUBLESHOOTING.md)
-- [DISASTER_RECOVERY](docs/DISASTER_RECOVERY.md)
-
-## Regras de Desenvolvimento
-
-> ⚠️ **IMPORTANTE**: Antes de marcar qualquer tarefa como concluída, atualize a documentação!
-
-Consulte [REGRAS.md](REGRAS.md) para:
-- Padrões de nomenclatura
-- Checklist de documentação
-- Regras de segurança
-- Formato de commits
-- Versionamento
-
-Referências:
-- [CHANGELOG.md](CHANGELOG.md) - Histórico de mudanças
-- [docs/platform/BLUEPRINT.md](docs/platform/BLUEPRINT.md) - Visão geral (atualizar sempre)
+---
 
 ## Custos
 
-| Item | Custo |
+| Item | Valor |
 |------|-------|
-| VPS 4GB | ~R$100/mês |
+| VPS (4GB RAM) | ~R$100/mês |
 | Domínio | ~R$40/ano |
-| OpenRouter | Grátis/R$5/mês |
-| **Total** | **~R$100-105/mês** |
+| OpenRouter (IA) | Grátis ou ~R$5/mês |
+| Supabase | Grátis (início) |
 
-## Manutenção
+---
 
-### Atualizações de Segurança
+## Documentação
 
-```bash
-# Sistema
-apt update && apt upgrade -y
+Para desenvolvedores:
 
-# OpenClaw
-npm update -g openclaw@latest
-systemctl restart openclaw
-```
+| Arquivo | O que contém |
+|---------|-------------|
+| [docs/platform/BLUEPRINT.md](docs/platform/BLUEPRINT.md) | Visão técnica completa |
+| [docs/platform/DATABASE.md](docs/platform/DATABASE.md) | Schema do banco de dados |
+| [docs/infra/seguranca.md](docs/infra/seguranca.md) | Boas práticas de segurança |
+| [REGRAS.md](REGRAS.md) | Regras de desenvolvimento |
+| [CHANGELOG.md](CHANGELOG.md) | Histórico de mudanças |
 
-### Verificação de Saúde
+---
 
-```bash
-# Executar health check
-/opt/monitoring/health-check.sh
-```
+## Equipe
+
+- **Lucas Drummond** - CEO / Desenvolvedor
+- **Matheus Guim** - Desenvolvedor
+- **Luca Junqueira** - Desenvolvedor
+- **João Pedro Santana** - Desenvolvedor
+
+---
 
 ## Licença
 

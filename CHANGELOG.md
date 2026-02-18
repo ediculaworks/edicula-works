@@ -8,6 +8,13 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [2.2.0] - 2026-02-18
+
+### Modificado
+- README.md reescrito focado em explicação para equipe (menos comandos técnicos)
+
+---
+
 ## [2.1.0] - 2026-02-18
 
 ### Adicionado
