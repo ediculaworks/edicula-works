@@ -12,6 +12,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ### Modificado
 - README.md reescrito focado em explicação para equipe (menos comandos técnicos)
+- Removidos valores de custos (a definir posteriormente)
+- OTIMIZACAO.md atualizado sem valores específicos
 
 ---
 

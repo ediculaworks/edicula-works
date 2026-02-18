@@ -120,12 +120,7 @@ Você pode interagir com os agentes de diferentes formas:
 
 ## Custos
 
-| Item | Valor |
-|------|-------|
-| VPS (4GB RAM) | ~R$100/mês |
-| Domínio | ~R$40/ano |
-| OpenRouter (IA) | Grátis ou ~R$5/mês |
-| Supabase | Grátis (início) |
+> Em definição - valores serão definidos posteriormente.
 
 ---
 

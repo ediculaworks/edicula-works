@@ -283,12 +283,7 @@ Verifique se a API Key está correta no .env.
 
 ## Custos Supabase
 
-| Plano | Preço | Limites |
-|-------|-------|---------|
-| Free | $0 | 500MB DB, 1GB Storage, 2 concurrent |
-| Pro | $25/mês | 8GB DB, 100GB Storage, 50 concurrent |
-
-Para uso interno, o **Free** é suficiente no início.
+Consulte o site do Supabase para valores atuais.
 
 ---
 
