@@ -1,90 +1,134 @@
-from typing import List, Optional
-from datetime import datetime
+from typing import List, Optional, Dict, Any
+from datetime import datetime, date, timedelta
 
-from api.schemas.contrato import ContratoCreate, ContratoUpdate, ContratoResponse
-
-contratos_db: List[dict] = []
+from api.database import get_db
+from api.schemas.contrato import ContratoCreate, ContratoUpdate
 
 
 async def listar_contratos(
+    empresa_id: int = 1,
     status: Optional[str] = None,
     tipo: Optional[str] = None,
-    contratante: Optional[str] = None,
+    cliente_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100
-) -> List[ContratoResponse]:
-    results = contratos_db.copy()
+) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    query = db.table("contratos").select("*").eq("empresa_id", empresa_id)
     
     if status:
-        results = [c for c in results if c["status"] == status]
+        query = query.eq("status", status)
     if tipo:
-        results = [c for c in results if c["tipo"] == tipo]
-    if contratante:
-        results = [c for c in results if contratante.lower() in c.get("contratante", "").lower()]
+        query = query.eq("tipo", tipo)
+    if cliente_id:
+        query = query.eq("cliente_id", cliente_id)
     
-    return results[skip:skip+limit]
-
-
-async def buscar_contrato(contrato_id: int) -> Optional[ContratoResponse]:
-    for contrato in contratos_db:
-        if contrato["id"] == contrato_id:
-            return contrato
-    return None
-
-
-async def criar_contrato(contrato: ContratoCreate) -> ContratoResponse:
-    now = datetime.utcnow()
-    novo_contrato = {
-        "id": len(contratos_db) + 1,
-        "titulo": contrato.titulo,
-        "tipo": contrato.tipo.value,
-        "contratante": contrato.contratante,
-        "contratado": contrato.contratado,
-        "valor": contrato.valor,
-        "periodicidade": contrato.periodicidade.value if contrato.periodicidade else None,
-        "status": contrato.status.value,
-        "data_inicio": contrato.data_inicio,
-        "data_fim": contrato.data_fim,
-        "descricao": contrato.descricao,
-        "embedding": None,
-        "created_at": now,
-        "updated_at": now
-    }
-    contratos_db.append(novo_contrato)
-    return novo_contrato
-
-
-async def atualizar_contrato(contrato_id: int, contrato: ContratoUpdate) -> Optional[ContratoResponse]:
-    for i, c in enumerate(contratos_db):
-        if c["id"] == contrato_id:
-            update_data = contrato.model_dump(exclude_unset=True)
-            for key, value in update_data.items():
-                if value is not None:
-                    if hasattr(value, 'value'):
-                        c[key] = value.value
-                    else:
-                        c[key] = value
-            c["updated_at"] = datetime.utcnow()
-            return c
-    return None
-
-
-async def deletar_contrato(contrato_id: int) -> bool:
-    for i, c in enumerate(contratos_db):
-        if c["id"] == contrato_id:
-            contratos_db.pop(i)
-            return True
-    return False
-
-
-async def contratos_vencem_em(dias: int) -> List[ContratoResponse]:
-    from datetime import timedelta
-    from api.services.tarefas import tarefas_db
+    query = query.order("created_at", desc=True).range(skip, skip + limit - 1)
     
-    hoje = datetime.utcnow()
+    result = query.execute()
+    return result.data or []
+
+
+async def buscar_contrato(contrato_id: int, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    result = db.table("contratos").select("*").eq("id", contrato_id).eq("empresa_id", empresa_id).execute()
+    
+    return result.data[0] if result.data else None
+
+
+async def criar_contrato(contrato: ContratoCreate) -> Dict[str, Any]:
+    db = get_db()
+    
+    data = contrato.model_dump()
+    
+    data["embedding"] = None
+    
+    result = db.table("contratos").insert(data).execute()
+    
+    return result.data[0] if result.data else None
+
+
+async def atualizar_contrato(contrato_id: int, contrato: ContratoUpdate, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    data = contrato.model_dump(exclude_unset=True)
+    
+    if data:
+        data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = db.table("contratos").update(data).eq("id", contrato_id).eq("empresa_id", empresa_id).execute()
+        
+        return result.data[0] if result.data else None
+    
+    return await buscar_contrato(contrato_id, empresa_id)
+
+
+async def deletar_contrato(contrato_id: int, empresa_id: int = 1) -> bool:
+    db = get_db()
+    
+    result = db.table("contratos").delete().eq("id", contrato_id).eq("empresa_id", empresa_id).execute()
+    
+    return len(result.data) > 0 if result.data else False
+
+
+async def contratos_vencem_em(dias: int, empresa_id: int = 1) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    hoje = date.today()
     limite = hoje + timedelta(days=dias)
     
-    return [
-        c for c in contratos_db
-        if c.get("data_fim") and c["data_fim"] <= limite and c["status"] == "active"
-    ]
+    result = db.table("contratos").select("*").eq("empresa_id", empresa_id).eq("status", "ativo").gte("data_fim", hoje.isoformat()).lte("data_fim", limite.isoformat()).execute()
+    
+    return result.data or []
+
+
+async def contratos_expirados(empresa_id: int = 1) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    hoje = date.today()
+    
+    result = db.table("contratos").select("*").eq("empresa_id", empresa_id).eq("status", "ativo").lt("data_fim", hoje.isoformat()).execute()
+    
+    return result.data or []
+
+
+async def adicionar_renovacao(
+    contrato_id: int,
+    data_inicio: date,
+    data_fim: date,
+    valor_novo: Optional[float] = None,
+    empresa_id: int = 1
+) -> Dict[str, Any]:
+    db = get_db()
+    
+    contrato = await buscar_contrato(contrato_id, empresa_id)
+    if not contrato:
+        raise ValueError("Contrato não encontrado")
+    
+    valor_anterior = contrato.get("valor")
+    
+    percentual_aumento = None
+    if valor_anterior and valor_novo:
+        percentual_aumento = ((valor_novo - valor_anterior) / valor_anterior) * 100
+    
+    result_renovacao = db.table("contrato_renovacoes").insert({
+        "contrato_id": contrato_id,
+        "numero_renovacao": 1,
+        "data_inicio": data_inicio.isoformat(),
+        "data_fim": data_fim.isoformat(),
+        "valor_anterior": valor_anterior,
+        "valor_novo": valor_novo,
+        "percentual_aumento": percentual_aumento,
+        "status": "ativa"
+    }).execute()
+    
+    db.table("contratos").update({
+        "data_inicio": data_inicio.isoformat(),
+        "data_fim": data_fim.isoformat(),
+        "valor": valor_novo,
+        "updated_at": datetime.utcnow().isoformat()
+    }).eq("id", contrato_id).eq("empresa_id", empresa_id).execute()
+    
+    return result_renovacao.data[0] if result_renovacao.data else {}

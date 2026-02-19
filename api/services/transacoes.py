@@ -1,120 +1,178 @@
-from typing import List, Optional
-from datetime import datetime
+from typing import List, Optional, Dict, Any
+from datetime import datetime, date
 
-from api.schemas.transacao import TransacaoCreate, TransacaoUpdate, TransacaoResponse
-
-transacoes_db: List[dict] = []
+from api.database import get_db
+from api.schemas.transacao import TransacaoCreate, TransacaoUpdate
 
 
 async def listar_transacoes(
+    empresa_id: int = 1,
     tipo: Optional[str] = None,
-    categoria: Optional[str] = None,
+    categoria_id: Optional[int] = None,
     status: Optional[str] = None,
-    projeto: Optional[str] = None,
+    projeto_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100
-) -> List[TransacaoResponse]:
-    results = transacoes_db.copy()
+) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    query = db.table("transacoes").select("*").eq("empresa_id", empresa_id)
     
     if tipo:
-        results = [t for t in results if t["tipo"] == tipo]
-    if categoria:
-        results = [t for t in results if t.get("categoria") == categoria]
+        query = query.eq("tipo", tipo)
+    if categoria_id:
+        query = query.eq("categoria_id", categoria_id)
     if status:
-        results = [t for t in results if t["status"] == status]
-    if projeto:
-        results = [t for t in results if t.get("projeto") == projeto]
+        query = query.eq("status", status)
+    if projeto_id:
+        query = query.eq("projeto_id", projeto_id)
     
-    return results[skip:skip+limit]
-
-
-async def buscar_transacao(transacao_id: int) -> Optional[TransacaoResponse]:
-    for transacao in transacoes_db:
-        if transacao["id"] == transacao_id:
-            return transacao
-    return None
-
-
-async def criar_transacao(transacao: TransacaoCreate) -> TransacaoResponse:
-    now = datetime.utcnow()
-    nova_transacao = {
-        "id": len(transacoes_db) + 1,
-        "tipo": transacao.tipo.value,
-        "categoria": transacao.categoria,
-        "descricao": transacao.descricao,
-        "valor": transacao.valor,
-        "data_transacao": transacao.data_transacao,
-        "data_vencimento": transacao.data_vencimento,
-        "data_pagamento": transacao.data_pagamento,
-        "status": transacao.status.value,
-        "projeto": transacao.projeto,
-        "contrato_id": transacao.contrato_id,
-        "created_at": now,
-        "updated_at": now
-    }
-    transacoes_db.append(nova_transacao)
-    return nova_transacao
-
-
-async def atualizar_transacao(transacao_id: int, transacao: TransacaoUpdate) -> Optional[TransacaoResponse]:
-    for i, t in enumerate(transacoes_db):
-        if t["id"] == transacao_id:
-            update_data = transacao.model_dump(exclude_unset=True)
-            for key, value in update_data.items():
-                if value is not None:
-                    if hasattr(value, 'value'):
-                        t[key] = value.value
-                    else:
-                        t[key] = value
-            t["updated_at"] = datetime.utcnow()
-            return t
-    return None
-
-
-async def deletar_transacao(transacao_id: int) -> bool:
-    for i, t in enumerate(transacoes_db):
-        if t["id"] == transacao_id:
-            transacoes_db.pop(i)
-            return True
-    return False
-
-
-async def resumo_mensal(ano: int, mes: int) -> dict:
-    receitas = sum(t["valor"] for t in transacoes_db 
-                   if t["tipo"] == "receita" 
-                   and t["data_transacao"].year == ano 
-                   and t["data_transacao"].month == mes
-                   and t["status"] == "pago")
+    query = query.order("data_transacao", desc=True).range(skip, skip + limit - 1)
     
-    despesas = sum(t["valor"] for t in transacoes_db 
-                   if t["tipo"] == "despesa" 
-                   and t["data_transacao"].year == ano 
-                   and t["data_transacao"].month == mes
-                   and t["status"] == "pago")
+    result = query.execute()
+    return result.data or []
+
+
+async def buscar_transacao(transacao_id: int, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    result = db.table("transacoes").select("*").eq("id", transacao_id).eq("empresa_id", empresa_id).execute()
+    
+    return result.data[0] if result.data else None
+
+
+async def criar_transacao(transacao: TransacaoCreate) -> Dict[str, Any]:
+    db = get_db()
+    
+    data = transacao.model_dump()
+    
+    data["tags"] = data.get("tags") or []
+    data["embedding"] = None
+    
+    result = db.table("transacoes").insert(data).execute()
+    
+    return result.data[0] if result.data else None
+
+
+async def atualizar_transacao(transacao_id: int, transacao: TransacaoUpdate, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    data = transacao.model_dump(exclude_unset=True)
+    
+    if "tags" in data and data["tags"] is None:
+        data["tags"] = []
+    
+    if data:
+        data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = db.table("transacoes").update(data).eq("id", transacao_id).eq("empresa_id", empresa_id).execute()
+        
+        return result.data[0] if result.data else None
+    
+    return await buscar_transacao(transacao_id, empresa_id)
+
+
+async def deletar_transacao(transacao_id: int, empresa_id: int = 1) -> bool:
+    db = get_db()
+    
+    result = db.table("transacoes").delete().eq("id", transacao_id).eq("empresa_id", empresa_id).execute()
+    
+    return len(result.data) > 0 if result.data else False
+
+
+async def resumo_mensal(ano: int, mes: int, empresa_id: int = 1) -> Dict[str, Any]:
+    db = get_db()
+    
+    data_inicio = date(ano, mes, 1)
+    if mes == 12:
+        data_fim = date(ano + 1, 1, 1)
+    else:
+        data_fim = date(ano, mes + 1, 1)
+    
+    receitas_result = db.table("transacoes").select(
+        db.context.postgrest.api.APIRPCBuilder("sum", ["valor"])
+    ).eq("empresa_id", empresa_id).eq("tipo", "receita").eq("status", "pago").gte("data_transacao", data_inicio.isoformat()).lt("data_transacao", data_fim.isoformat()).execute()
+    
+    despesas_result = db.table("transacoes").select(
+        db.context.postgrest.api.APIRPCBuilder("sum", ["valor"])
+    ).eq("empresa_id", empresa_id).eq("tipo", "despesa").eq("status", "pago").gte("data_transacao", data_inicio.isoformat()).lt("data_transacao", data_fim.isoformat()).execute()
+    
+    receitas = receitas_result.data[0].get("sum", 0) if receitas_result.data else 0
+    despesas = despesas_result.data[0].get("sum", 0) if despesas_result.data else 0
     
     return {
         "ano": ano,
         "mes": mes,
-        "receitas": receitas,
-        "despesas": despesas,
-        "saldo": receitas - despesas
+        "receitas": receitas or 0,
+        "despesas": despesas or 0,
+        "saldo": (receitas or 0) - (despesas or 0)
     }
 
 
-async def resumo_por_projeto() -> List[dict]:
-    projetos = {}
+async def resumo_por_projeto(empresa_id: int = 1) -> List[Dict[str, Any]]:
+    db = get_db()
     
-    for t in transacoes_db:
-        projeto = t.get("projeto", "Sem projeto")
-        if projeto not in projetos:
-            projetos[projeto] = {"receitas": 0, "despesas": 0}
+    result = db.table("transacoes").select(
+        "projeto_id",
+        "tipo",
+        "valor"
+    ).eq("empresa_id", empresa_id).execute()
+    
+    projetos: Dict[int, Dict[str, float]] = {}
+    
+    for item in result.data or []:
+        projeto_id = item.get("projeto_id") or 0
+        if projeto_id not in projetos:
+            projetos[projeto_id] = {"receitas": 0, "despesas": 0}
         
-        if t["tipo"] == "receita":
-            projetos[projeto]["receitas"] += t["valor"]
+        if item["tipo"] == "receita":
+            projetos[projeto_id]["receitas"] += item["valor"] or 0
         else:
-            projetos[projeto]["despesas"] += t["valor"]
+            projetos[projeto_id]["despesas"] += item["valor"] or 0
     
     return [
-        {"projeto": p, **vals, "saldo": vals["receitas"] - vals["despesas"]}
-        for p, vals in projetos.items()
+        {
+            "projeto_id": pid,
+            "receitas": vals["receitas"],
+            "despesas": vals["despesas"],
+            "saldo": vals["receitas"] - vals["despesas"]
+        }
+        for pid, vals in projetos.items()
+    ]
+
+
+async def resumo_por_categoria(ano: int, mes: int, empresa_id: int = 1) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    data_inicio = date(ano, mes, 1)
+    if mes == 12:
+        data_fim = date(ano + 1, 1, 1)
+    else:
+        data_fim = date(ano, mes + 1, 1)
+    
+    result = db.table("transacoes").select(
+        "categoria_id",
+        "tipo",
+        "valor"
+    ).eq("empresa_id", empresa_id).eq("status", "pago").gte("data_transacao", data_inicio.isoformat()).lt("data_transacao", data_fim.isoformat()).execute()
+    
+    categorias: Dict[int, Dict[str, float]] = {}
+    
+    for item in result.data or []:
+        cat_id = item.get("categoria_id") or 0
+        if cat_id not in categorias:
+            categorias[cat_id] = {"receitas": 0, "despesas": 0}
+        
+        if item["tipo"] == "receita":
+            categorias[cat_id]["receitas"] += item["valor"] or 0
+        else:
+            categorias[cat_id]["despesas"] += item["valor"] or 0
+    
+    return [
+        {
+            "categoria_id": cid,
+            "receitas": vals["receitas"],
+            "despesas": vals["despesas"]
+        }
+        for cid, vals in categorias.items()
     ]

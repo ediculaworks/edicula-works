@@ -1,5 +1,7 @@
 # Schema do Banco de Dados - EdiculaWorks Platform
 
+> **⚠️ IMPORTANTE**: O schema oficial está em [`schema.sql`](schema.sql). Este documento é apenas referência.
+
 ## Visão Geral
 
 Banco de dados PostgreSQL com extensão pgVector para buscas por similaridade semântica.

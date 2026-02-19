@@ -8,6 +8,61 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [3.1.0] - 2026-02-19
+
+### Adicionado
+- Subagentes especializados do TechLead (`skills/techlead/`)
+  - `implementador.md`: Implementa código com metodologia red-green-refactor
+  - `revisor-codigo.md`: Revisão adversarial (3-10 issues mínimas)
+  - `testador-qa.md`: Testes funcionais e de regressão
+  - `revisor-ui-ux.md`: Validação de interface e acessibilidade
+  - `desenvolvedor-frontend.md`: Componentes React/Next.js
+- `workspace/tech/SOUL.md`: Atualizado para funcionar como orquestrador de subagentes
+
+### Modificado
+- TechLead agora delega tarefas para subagentes especializados via sessions_spawn
+- Workflow: Implementador → Revisor → QA → (UI/UX opcional)
+
+---
+
+## [3.0.0] - 2026-02-19
+
+### Adicionado
+- Schema SQL completo (`docs/platform/schema.sql`) - versão enterprise com ~40 tabelas
+  - Módulo Core: empresas, usuarios, perfis, configuracoes
+  - Módulo Gestão: projetos, tarefas, subtarefas, comentarios, anexos, tags, checklist, historico
+  - Módulo Contratos: contratos, renovações, clientes, fornecedores
+  - Módulo Financeiro: transacoes, categorias, faturas, orçamentos, contas, centros custo, metas
+  - Módulo Documentos: documentos, categorias, tags
+  - Módulo IA: conversas, mensagens, embeddings_cache, buscas_salvas
+  - Módulo Sistema: notificacoes, email_queue, webhooks
+  - Módulo Auditoria: audit_logs, sessoes
+  - Índices otimizados para busca vetorial e queries comuns
+  - Dados iniciais (empresa, usuarios, categorias, tarefas exemplo)
+  - Funções úteis (busca semântica, audit trail, triggers)
+- Arquivo `.env` para API (`api/.env`) com credenciais Supabase
+- Atualizado `.env.example` com variáveis Supabase
+
+### Modificado
+- `docs/platform/DATABASE.md`: agora指向 schema.sql como fonte oficial
+
+### Adicionado (API)
+- `api/database.py`: Cliente Supabase singleton
+- `api/requirements.txt`: Dependências (supabase, sqlalchemy, psycopg2, etc)
+- `api/schemas/tarefa.py`: Schema atualizado com campos do schema SQL
+- `api/schemas/contrato.py`: Schema atualizado com campos do schema SQL
+- `api/schemas/transacao.py`: Schema atualizado com campos do schema SQL
+
+### Modificado (API)
+- `api/services/tarefas.py`: Conectado ao Supabase
+- `api/services/contratos.py`: Conectado ao Supabase + renovações
+- `api/services/transacoes.py`: Conectado ao Supabase + resumos
+- `api/routes/tarefas.py`: Parâmetros atualizados (empresa_id, projeto_id)
+- `api/routes/contratos.py`: Parâmetros atualizados (empresa_id, cliente_id)
+- `api/routes/transacoes.py`: Parâmetros atualizados (empresa_id, categoria_id)
+
+---
+
 ## [2.2.1] - 2026-02-18
 
 ### Modificado

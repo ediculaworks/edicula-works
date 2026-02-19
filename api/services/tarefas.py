@@ -1,90 +1,125 @@
-from typing import List, Optional
-from datetime import datetime
-import uuid
+from typing import List, Optional, Any, Dict
+from datetime import datetime, date
 
+from api.database import get_db
 from api.schemas.tarefa import TarefaCreate, TarefaUpdate, TarefaResponse
-
-tarefas_db: List[dict] = []
 
 
 async def listar_tarefas(
+    empresa_id: int = 1,
     coluna: Optional[str] = None,
     prioridade: Optional[str] = None,
-    responsavel: Optional[str] = None,
-    projeto: Optional[str] = None,
+    responsavel: Optional[int] = None,
+    projeto_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100
-) -> List[TarefaResponse]:
-    results = tarefas_db.copy()
+) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    query = db.table("tarefas").select("*").eq("empresa_id", empresa_id)
     
     if coluna:
-        results = [t for t in results if t["coluna"] == coluna]
+        query = query.eq("coluna", coluna)
     if prioridade:
-        results = [t for t in results if t["prioridade"] == prioridade]
+        query = query.eq("prioridade", prioridade)
     if responsavel:
-        results = [t for t in results if responsavel in t.get("responsaveis", [])]
-    if projeto:
-        results = [t for t in results if t.get("projeto") == projeto]
+        query = query.contains("responsaveis", [responsavel])
+    if projeto_id:
+        query = query.eq("projeto_id", projeto_id)
     
-    return results[skip:skip+limit]
+    query = query.order("created_at", desc=True).range(skip, skip + limit - 1)
+    
+    result = query.execute()
+    return result.data or []
 
 
-async def buscar_tarefa(tarefa_id: int) -> Optional[TarefaResponse]:
-    for tarefa in tarefas_db:
-        if tarefa["id"] == tarefa_id:
-            return tarefa
-    return None
+async def buscar_tarefa(tarefa_id: int, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    result = db.table("tarefas").select("*").eq("id", tarefa_id).eq("empresa_id", empresa_id).execute()
+    
+    return result.data[0] if result.data else None
 
 
-async def criar_tarefa(tarefa: TarefaCreate) -> TarefaResponse:
-    now = datetime.utcnow()
-    nova_tarefa = {
-        "id": len(tarefas_db) + 1,
-        "titulo": tarefa.titulo,
-        "descricao": tarefa.descricao,
-        "coluna": tarefa.coluna.value,
-        "prioridade": tarefa.prioridade.value,
-        "responsaveis": tarefa.responsaveis or [],
-        "projeto": tarefa.projeto,
-        "cliente": tarefa.cliente,
-        "prazo": tarefa.prazo,
-        "estimativa": tarefa.estimativa,
-        "tags": tarefa.tags or [],
-        "embedding": None,
-        "created_at": now,
-        "updated_at": now
+async def criar_tarefa(tarefa: TarefaCreate) -> Dict[str, Any]:
+    db = get_db()
+    
+    data = tarefa.model_dump()
+    
+    data["responsaveis"] = data.get("responsaveis") or []
+    data["tags"] = data.get("tags") or []
+    data["embedding"] = None
+    
+    result = db.table("tarefas").insert(data).execute()
+    
+    return result.data[0] if result.data else None
+
+
+async def atualizar_tarefa(tarefa_id: int, tarefa: TarefaUpdate, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    data = tarefa.model_dump(exclude_unset=True)
+    
+    if "tags" in data and data["tags"] is None:
+        data["tags"] = []
+    
+    if data:
+        data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = db.table("tarefas").update(data).eq("id", tarefa_id).eq("empresa_id", empresa_id).execute()
+        
+        return result.data[0] if result.data else None
+    
+    return await buscar_tarefa(tarefa_id, empresa_id)
+
+
+async def deletar_tarefa(tarefa_id: int, empresa_id: int = 1) -> bool:
+    db = get_db()
+    
+    result = db.table("tarefas").delete().eq("id", tarefa_id).eq("empresa_id", empresa_id).execute()
+    
+    return len(result.data) > 0 if result.data else False
+
+
+async def mover_tarefa(tarefa_id: int, coluna: str, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
+    db = get_db()
+    
+    data = {
+        "coluna": coluna,
+        "updated_at": datetime.utcnow().isoformat()
     }
-    tarefas_db.append(nova_tarefa)
-    return nova_tarefa
+    
+    if coluna == "done":
+        data["data_conclusao"] = datetime.utcnow().isoformat()
+    
+    result = db.table("tarefas").update(data).eq("id", tarefa_id).eq("empresa_id", empresa_id).execute()
+    
+    return result.data[0] if result.data else None
 
 
-async def atualizar_tarefa(tarefa_id: int, tarefa: TarefaUpdate) -> Optional[TarefaResponse]:
-    for i, t in enumerate(tarefas_db):
-        if t["id"] == tarefa_id:
-            update_data = tarefa.model_dump(exclude_unset=True)
-            for key, value in update_data.items():
-                if value is not None:
-                    if hasattr(value, 'value'):
-                        t[key] = value.value
-                    else:
-                        t[key] = value
-            t["updated_at"] = datetime.utcnow()
-            return t
-    return None
+async def buscar_tarefas_semelhantes(
+    query_text: str,
+    empresa_id: int = 1,
+    limite: int = 10
+) -> List[Dict[str, Any]]:
+    db = get_db()
+    
+    embedding = await gerar_embedding(query_text)
+    
+    if not embedding:
+        return []
+    
+    result = db.rpc(
+        "buscar_tarefas_similares",
+        {
+            "query_embedding": embedding,
+            "empresa_id_int": empresa_id,
+            "limite": limite
+        }
+    ).execute()
+    
+    return result.data or []
 
 
-async def deletar_tarefa(tarefa_id: int) -> bool:
-    for i, t in enumerate(tarefas_db):
-        if t["id"] == tarefa_id:
-            tarefas_db.pop(i)
-            return True
-    return False
-
-
-async def mover_tarefa(tarefa_id: int, coluna: str) -> Optional[TarefaResponse]:
-    for t in tarefas_db:
-        if t["id"] == tarefa_id:
-            t["coluna"] = coluna
-            t["updated_at"] = datetime.utcnow()
-            return t
+async def gerar_embedding(text: str) -> Optional[List[float]]:
     return None
