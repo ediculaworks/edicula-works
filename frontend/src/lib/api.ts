@@ -23,6 +23,9 @@ export const api = {
     prioridade?: string
     responsavel?: number
     projeto_id?: number
+    status?: string
+    skip?: number
+    limit?: number
   }) {
     const searchParams = new URLSearchParams()
     if (params?.empresa_id) searchParams.set('empresa_id', params.empresa_id.toString())
@@ -30,6 +33,9 @@ export const api = {
     if (params?.prioridade) searchParams.set('prioridade', params.prioridade)
     if (params?.responsavel) searchParams.set('responsavel', params.responsavel.toString())
     if (params?.projeto_id) searchParams.set('projeto_id', params.projeto_id.toString())
+    if (params?.status) searchParams.set('status', params.status)
+    if (params?.skip) searchParams.set('skip', params.skip.toString())
+    if (params?.limit) searchParams.set('limit', params.limit.toString())
     
     const url = `${API_BASE}/tarefas${searchParams.toString() ? '?' + searchParams : ''}`
     const response = await fetch(url)
@@ -68,7 +74,7 @@ export const api = {
     }
   },
 
-  async moverTarefa(id: number, coluna: string) {
+  async moverTarefa(id: number, coluna: ColunaKanban) {
     const response = await fetch(`${API_BASE}/tarefas/${id}/mover?coluna=${coluna}`, {
       method: 'POST',
     })
@@ -285,4 +291,6 @@ export const api = {
 }
 
 // Types inline (importados do types/index)
-import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint } from '@/types'
+import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, ColunaKanban } from '@/types'
+
+export type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint }

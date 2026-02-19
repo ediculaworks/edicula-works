@@ -17,6 +17,7 @@ import {
   MessageSquare,
   X,
   ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 
 const navItems = [
@@ -34,7 +35,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { sidebarOpen, setSidebarOpen } = useUIStore()
+  const { sidebarOpen, sidebarCollapsed, setSidebarOpen, toggleSidebarCollapsed } = useUIStore()
 
   return (
     <>
@@ -49,17 +50,28 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen w-64 border-r border-[var(--border)] bg-[var(--surface)] transition-transform duration-200",
+          "fixed left-0 top-0 z-50 h-screen border-r border-[var(--border)] bg-[var(--surface)] transition-all duration-200",
           "md:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          sidebarCollapsed ? "w-16" : "w-64"
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-[var(--border)] px-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-[var(--primary)]" />
-            <span className="font-semibold">EdiculaWorks</span>
-          </Link>
+        <div className={cn(
+          "flex h-16 items-center border-b border-[var(--border)] px-4",
+          sidebarCollapsed ? "justify-center" : "justify-between"
+        )}>
+          {!sidebarCollapsed && (
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-[var(--primary)]" />
+              <span className="font-semibold">EdiculaWorks</span>
+            </Link>
+          )}
+          {sidebarCollapsed && (
+            <Link href="/dashboard" className="flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-[var(--primary)]" />
+            </Link>
+          )}
           <button
             onClick={() => setSidebarOpen(false)}
             className="rounded-md p-1 hover:bg-[var(--surface-hover)] md:hidden"
@@ -69,7 +81,10 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col gap-1 p-4">
+        <nav className={cn(
+          "flex flex-col gap-1 p-2",
+          sidebarCollapsed ? "items-center" : ""
+        )}>
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
             return (
@@ -80,23 +95,29 @@ export function Sidebar() {
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-[var(--primary)]/10 text-[var(--primary)]"
-                    : "text-[var(--foreground)]/60 hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
+                    : "text-[var(--foreground)]/60 hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]",
+                  sidebarCollapsed && "justify-center px-2"
                 )}
                 onClick={() => setSidebarOpen(false)}
+                title={sidebarCollapsed ? item.label : undefined}
               >
-                <item.icon className="h-5 w-5" />
-                {item.label}
+                <item.icon className="h-5 w-5 shrink-0" />
+                {!sidebarCollapsed && <span>{item.label}</span>}
               </Link>
             )
           })}
         </nav>
 
-        {/* Collapse button (desktop) */}
+        {/* Collapse toggle button (desktop) */}
         <button
-          onClick={() => setSidebarOpen(false)}
-          className="absolute bottom-4 right-4 hidden rounded-md border border-[var(--border)] bg-[var(--surface)] p-1 md:block"
+          onClick={toggleSidebarCollapsed}
+          className="absolute bottom-4 right-0 rounded-md border border-[var(--border)] bg-[var(--surface)] p-2 hover:bg-[var(--surface-hover)] hidden md:block"
         >
-          <ChevronLeft className="h-4 w-4" />
+          {sidebarCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
         </button>
       </aside>
     </>

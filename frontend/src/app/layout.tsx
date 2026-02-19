@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { Providers } from "@/components/providers/providers"
 
 export const metadata: Metadata = {
   title: "EdiculaWorks",
@@ -14,8 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className="antialiased">
-        {children}
+      <body className="antialiased h-screen overflow-hidden">
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )
