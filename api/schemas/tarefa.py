@@ -18,6 +18,14 @@ class Coluna(str, Enum):
     done = "done"
 
 
+class Status(str, Enum):
+    ativa = "ativa"
+    pausada = "pausada"
+    suspensa = "suspensa"
+    abandonada = "abandonada"
+    concluida = "concluida"
+
+
 class TarefaCreate(BaseModel):
     empresa_id: int = 1
     projeto_id: Optional[int] = None
@@ -42,7 +50,7 @@ class TarefaCreate(BaseModel):
     tags: Optional[List[str]] = []
     created_by: Optional[int] = None
     
-    status: str = "ativa"
+    status: Status = Status.ativa
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
     observadores: Optional[List[int]] = []

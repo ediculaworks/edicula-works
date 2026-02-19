@@ -114,16 +114,57 @@ export default function DashboardPage() {
     return usuario?.nome || `User ${id}`
   }
 
+  const stats = [
+    { label: "Tarefas Ativas", value: tarefasAtivas, icon: Activity, color: "var(--success)", trend: "+5%" },
+    { label: "Concluídas", value: tarefasConcluidas, icon: CheckCircle2, color: "var(--primary)", trend: "+12%" },
+    { label: "Pausadas", value: tarefasPausadas, icon: Clock, color: "var(--warning)", trend: "-3%" },
+    { label: "Total", value: apiTarefas.length, icon: Target, color: "var(--accent)", trend: null },
+  ]
+
   return (
     <DashboardLayout>
-      <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-12">
+      <div className="space-y-4">
         
-        {/* Main Content - Left */}
-        <div className="lg:col-span-8 space-y-4">
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              className="bento-item p-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div 
+                  className="h-8 w-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${stat.color}20` }}
+                >
+                  <stat.icon className="h-4 w-4" style={{ color: stat.color }} />
+                </div>
+                {stat.trend && (
+                  <span className={cn(
+                    "text-xs font-medium",
+                    stat.trend.startsWith("+") ? "text-green-500" : "text-red-500"
+                  )}>
+                    {stat.trend}
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl font-bold">{loading ? "-" : stat.value}</p>
+              <p className="text-xs text-[var(--foreground)]/50">{stat.label}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-12">
           
-          {/* Últimas Tarefas */}
-          <motion.div variants={sectionVariants} className="bento-item">
-            <div className="flex items-center justify-between mb-4">
+          {/* Main Content - Left */}
+          <div className="lg:col-span-8 space-y-4">
+            
+            {/* Últimas Tarefas */}
+            <motion.div variants={sectionVariants} className="bento-item">
+              <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Target className="h-5 w-5 text-[var(--primary)]" />
                 Últimas Tarefas
@@ -375,6 +416,7 @@ export default function DashboardPage() {
             </div>
           </motion.div>
         </div>
+      </div>
       </div>
     </DashboardLayout>
   )
