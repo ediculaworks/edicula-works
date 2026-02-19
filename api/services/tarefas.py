@@ -11,6 +11,9 @@ async def listar_tarefas(
     prioridade: Optional[str] = None,
     responsavel: Optional[int] = None,
     projeto_id: Optional[int] = None,
+    sprint_id: Optional[int] = None,
+    grupo_id: Optional[int] = None,
+    status: Optional[str] = None,
     skip: int = 0,
     limit: int = 100
 ) -> List[Dict[str, Any]]:
@@ -26,6 +29,12 @@ async def listar_tarefas(
         query = query.contains("responsaveis", [responsavel])
     if projeto_id:
         query = query.eq("projeto_id", projeto_id)
+    if sprint_id:
+        query = query.eq("sprint_id", sprint_id)
+    if grupo_id:
+        query = query.eq("grupo_id", grupo_id)
+    if status:
+        query = query.eq("status", status)
     
     query = query.order("created_at", desc=True).range(skip, skip + limit - 1)
     

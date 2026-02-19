@@ -238,8 +238,98 @@ CREATE TABLE tarefas (
     -- ordem dentro da coluna
     ordem INTEGER DEFAULT 0,
     
+    -- Status (ativa, pausada, abandonada, suspensa)
+    status VARCHAR(20) DEFAULT 'ativa',
+    
+    -- Sprint e Grupo
+    sprint_id INTEGER REFERENCES sprints(id) ON DELETE SET NULL,
+    grupo_id INTEGER REFERENCES grupos(id) ON DELETE SET NULL,
+    
+    -- Observadores
+    observadores INTEGER[] DEFAULT '{}',
+    
+    -- Previsão de entrega (forecast)
+    previsao_entrega DATE,
+    estimativa_horas_prevista DECIMAL(6,2),
+    
+    -- Data de início
+    data_inicio TIMESTAMP WITH TIME ZONE,
+    
+    -- Motivos de pausa/suspensão/abandono
+    motivo_pausa TEXT,
+    motivo_suspensao TEXT,
+    motivo_abandono TEXT,
+    
+    -- Data de pausa/suspensão
+    data_pausa TIMESTAMP WITH TIME ZONE,
+    data_suspensao TIMESTAMP WITH TIME ZONE,
+    data_abandono TIMESTAMP WITH TIME ZONE,
+    
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Grupos de Tarefas (customizáveis)
+CREATE TABLE grupos (
+    id SERIAL PRIMARY KEY,
+    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
+    
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    cor VARCHAR(7) DEFAULT '#6b7280',
+    icone VARCHAR(50),
+    
+    -- Configurações
+    ativo BOOLEAN DEFAULT true,
+    ordem INTEGER DEFAULT 0,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sprints
+CREATE TABLE sprints (
+    id SERIAL PRIMARY KEY,
+    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
+    projeto_id INTEGER REFERENCES projetos(id) ON DELETE SET NULL,
+    
+    nome VARCHAR(100) NOT NULL,
+    objetivo TEXT,
+    
+    -- Datas
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    data_conclusao DATE,
+    
+    -- Status
+    status VARCHAR(20) DEFAULT 'planejada', -- planejada, ativa, concluida, cancelada
+    
+    -- Meta
+    meta_pontos INTEGER,
+    pontos_concluidos INTEGER DEFAULT 0,
+    
+    -- Configurações
+    ordem INTEGER DEFAULT 0,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Dependências de Tarefas
+CREATE TABLE tarefa_dependencias (
+    id SERIAL PRIMARY KEY,
+    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
+    
+    tarefa_id INTEGER REFERENCES tarefas(id) ON DELETE CASCADE,
+    tarefa_dependente_id INTEGER REFERENCES tarefas(id) ON DELETE CASCADE,
+    
+    -- Tipo de dependência
+    tipo VARCHAR(20) DEFAULT 'finishes', -- finishes, starts, blocks, is_blocked_by
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    
+    UNIQUE(tarefa_id, tarefa_dependente_id, tipo)
 );
 
 -- Subtarefas (alternativa não-hierárquica)

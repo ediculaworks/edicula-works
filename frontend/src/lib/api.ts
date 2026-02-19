@@ -75,6 +75,148 @@ export const api = {
     return handleResponse<Tarefa>(response)
   },
 
+  async iniciarTarefa(id: number) {
+    const response = await fetch(`${API_BASE}/tarefas/${id}/iniciar`, {
+      method: 'POST',
+    })
+    return handleResponse<Tarefa>(response)
+  },
+
+  async pausarTarefa(id: number, motivo?: string) {
+    const response = await fetch(`${API_BASE}/tarefas/${id}/pausar?motivo=${encodeURIComponent(motivo || '')}`, {
+      method: 'POST',
+    })
+    return handleResponse<Tarefa>(response)
+  },
+
+  async abandonarTarefa(id: number, motivo?: string) {
+    const response = await fetch(`${API_BASE}/tarefas/${id}/abandonar?motivo=${encodeURIComponent(motivo || '')}`, {
+      method: 'POST',
+    })
+    return handleResponse<Tarefa>(response)
+  },
+
+  async suspenderTarefa(id: number, motivo?: string) {
+    const response = await fetch(`${API_BASE}/tarefas/${id}/suspender?motivo=${encodeURIComponent(motivo || '')}`, {
+      method: 'POST',
+    })
+    return handleResponse<Tarefa>(response)
+  },
+
+  async finalizarTarefa(id: number) {
+    const response = await fetch(`${API_BASE}/tarefas/${id}/finalizar`, {
+      method: 'POST',
+    })
+    return handleResponse<Tarefa>(response)
+  },
+
+  // Grupos
+  async getGrupos(empresaId: number = 1, ativo?: boolean) {
+    const params = new URLSearchParams({ empresa_id: empresaId.toString() })
+    if (ativo !== undefined) params.set('ativo', ativo.toString())
+    const response = await fetch(`${API_BASE}/grupos?${params}`)
+    return handleResponse<Grupo[]>(response)
+  },
+
+  async getGrupo(id: number) {
+    const response = await fetch(`${API_BASE}/grupos/${id}`)
+    return handleResponse<Grupo>(response)
+  },
+
+  async createGrupo(data: Partial<Grupo>) {
+    const response = await fetch(`${API_BASE}/grupos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Grupo>(response)
+  },
+
+  async updateGrupo(id: number, data: Partial<Grupo>) {
+    const response = await fetch(`${API_BASE}/grupos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Grupo>(response)
+  },
+
+  async deleteGrupo(id: number) {
+    const response = await fetch(`${API_BASE}/grupos/${id}`, {
+      method: 'DELETE',
+    })
+    if (response.status !== 204) {
+      throw new ApiError(response.status, 'Erro ao deletar')
+    }
+  },
+
+  // Sprints
+  async getSprints(params?: {
+    empresa_id?: number
+    projeto_id?: number
+    status?: string
+  }) {
+    const searchParams = new URLSearchParams()
+    if (params?.empresa_id) searchParams.set('empresa_id', params.empresa_id.toString())
+    if (params?.projeto_id) searchParams.set('projeto_id', params.projeto_id.toString())
+    if (params?.status) searchParams.set('status', params.status)
+    
+    const url = `${API_BASE}/sprints${searchParams.toString() ? '?' + searchParams : ''}`
+    const response = await fetch(url)
+    return handleResponse<Sprint[]>(response)
+  },
+
+  async getSprintAtiva(empresaId: number = 1) {
+    const response = await fetch(`${API_BASE}/sprints/ativa?empresa_id=${empresaId}`)
+    return handleResponse<Sprint>(response)
+  },
+
+  async getSprint(id: number) {
+    const response = await fetch(`${API_BASE}/sprints/${id}`)
+    return handleResponse<Sprint>(response)
+  },
+
+  async createSprint(data: Partial<Sprint>) {
+    const response = await fetch(`${API_BASE}/sprints`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Sprint>(response)
+  },
+
+  async updateSprint(id: number, data: Partial<Sprint>) {
+    const response = await fetch(`${API_BASE}/sprints/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Sprint>(response)
+  },
+
+  async deleteSprint(id: number) {
+    const response = await fetch(`${API_BASE}/sprints/${id}`, {
+      method: 'DELETE',
+    })
+    if (response.status !== 204) {
+      throw new ApiError(response.status, 'Erro ao deletar')
+    }
+  },
+
+  async iniciarSprint(id: number) {
+    const response = await fetch(`${API_BASE}/sprints/${id}/iniciar`, {
+      method: 'POST',
+    })
+    return handleResponse<Sprint>(response)
+  },
+
+  async concluirSprint(id: number) {
+    const response = await fetch(`${API_BASE}/sprints/${id}/concluir`, {
+      method: 'POST',
+    })
+    return handleResponse<Sprint>(response)
+  },
+
   // Contratos
   async getContratos(params?: {
     empresa_id?: number
@@ -143,4 +285,4 @@ export const api = {
 }
 
 // Types inline (importados do types/index)
-import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem } from '@/types'
+import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint } from '@/types'

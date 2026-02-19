@@ -47,6 +47,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 120,
     ordem: 0,
     eh_subtarefa: false,
+    status: "concluida",
+    observadores: [],
   },
   {
     id: 2,
@@ -62,6 +64,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 180,
     ordem: 1,
     eh_subtarefa: false,
+    status: "concluida",
+    observadores: [],
   },
   {
     id: 3,
@@ -78,6 +82,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 60,
     ordem: 0,
     eh_subtarefa: false,
+    status: "ativa",
+    observadores: [],
   },
   {
     id: 4,
@@ -93,6 +99,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 0,
     ordem: 0,
     eh_subtarefa: false,
+    status: "ativa",
+    observadores: [],
   },
   {
     id: 5,
@@ -108,6 +116,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 0,
     ordem: 1,
     eh_subtarefa: false,
+    status: "ativa",
+    observadores: [],
   },
   {
     id: 6,
@@ -123,6 +133,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 0,
     ordem: 2,
     eh_subtarefa: false,
+    status: "ativa",
+    observadores: [],
   },
   {
     id: 7,
@@ -137,6 +149,8 @@ const tarefasExemplo: Tarefa[] = [
     tempo_gasto_minutos: 0,
     ordem: 0,
     eh_subtarefa: false,
+    status: "ativa",
+    observadores: [],
   },
 ]
 

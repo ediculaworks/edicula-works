@@ -6,8 +6,14 @@ export type Prioridade = 'urgente' | 'alta' | 'media' | 'baixa'
 // Enum de colunas do Kanban
 export type ColunaKanban = 'todo' | 'in_progress' | 'review' | 'done'
 
+// Status de tarefas
+export type StatusTarefa = 'ativa' | 'pausada' | 'abandonada' | 'suspensa' | 'concluida'
+
 // Status de contratos
 export type StatusContrato = 'rascunho' | 'ativo' | 'expirado' | 'encerrado' | 'cancelado'
+
+// Status de sprint
+export type StatusSprint = 'planejada' | 'ativa' | 'concluida' | 'cancelada'
 
 // Tipos de transação
 export type TipoTransacao = 'receita' | 'despesa' | 'transferencia'
@@ -47,6 +53,22 @@ export interface Tarefa {
   eh_subtarefa: boolean
   ordem: number
   tags: string[]
+  
+  // Novos campos
+  status: StatusTarefa
+  sprint_id?: number
+  grupo_id?: number
+  observadores: number[]
+  previsao_entrega?: string
+  estimativa_horas_prevista?: number
+  data_inicio?: string
+  motivo_pausa?: string
+  motivo_suspensao?: string
+  motivo_abandono?: string
+  data_pausa?: string
+  data_suspensao?: string
+  data_abandono?: string
+  
   created_at: string
   updated_at: string
 }
@@ -128,4 +150,34 @@ export interface Mensagem {
   role: 'user' | 'assistant' | 'system'
   conteudo: string
   created_at: string
+}
+
+export interface Grupo {
+  id: number
+  empresa_id: number
+  nome: string
+  descricao?: string
+  cor: string
+  icone?: string
+  ativo: boolean
+  ordem: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Sprint {
+  id: number
+  empresa_id: number
+  projeto_id?: number
+  nome: string
+  objetivo?: string
+  data_inicio: string
+  data_fim: string
+  data_conclusao?: string
+  status: StatusSprint
+  meta_pontos?: number
+  pontos_concluidos: number
+  ordem: number
+  created_at: string
+  updated_at: string
 }

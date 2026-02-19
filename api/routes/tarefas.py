@@ -14,6 +14,9 @@ async def listar_tarefas(
     prioridade: Optional[str] = Query(None, description="Filtrar por prioridade"),
     responsavel: Optional[int] = Query(None, description="Filtrar por responsável (ID)"),
     projeto_id: Optional[int] = Query(None, description="Filtrar por projeto (ID)"),
+    sprint_id: Optional[int] = Query(None, description="Filtrar por sprint (ID)"),
+    grupo_id: Optional[int] = Query(None, description="Filtrar por grupo (ID)"),
+    status: Optional[str] = Query(None, description="Filtrar por status (ativa, pausada, abandonada, suspensa)"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500)
 ):
@@ -23,6 +26,9 @@ async def listar_tarefas(
         prioridade=prioridade,
         responsavel=responsavel,
         projeto_id=projeto_id,
+        sprint_id=sprint_id,
+        grupo_id=grupo_id,
+        status=status,
         skip=skip,
         limit=limit
     )
@@ -59,6 +65,71 @@ async def deletar_tarefa(tarefa_id: int, empresa_id: int = Query(1)):
 @router.post("/{tarefa_id}/mover")
 async def mover_tarefa(tarefa_id: int, coluna: str, empresa_id: int = Query(1)):
     tarefa = await tarefa_service.mover_tarefa(tarefa_id, coluna, empresa_id)
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    return tarefa
+
+
+@router.post("/{tarefa_id}/iniciar", response_model=TarefaResponse)
+async def iniciar_tarefa(tarefa_id: int, empresa_id: int = Query(1)):
+    from datetime import datetime
+    tarefa = await tarefa_service.atualizar_tarefa(
+        tarefa_id,
+        {"status": "ativa", "data_inicio": datetime.now().isoformat()},
+        empresa_id
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    return tarefa
+
+
+@router.post("/{tarefa_id}/pausar", response_model=TarefaResponse)
+async def pausar_tarefa(tarefa_id: int, motivo: str = "", empresa_id: int = Query(1)):
+    from datetime import datetime
+    tarefa = await tarefa_service.atualizar_tarefa(
+        tarefa_id,
+        {"status": "pausada", "motivo_pausa": motivo, "data_pausa": datetime.now().isoformat()},
+        empresa_id
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    return tarefa
+
+
+@router.post("/{tarefa_id}/abandonar", response_model=TarefaResponse)
+async def abandonar_tarefa(tarefa_id: int, motivo: str = "", empresa_id: int = Query(1)):
+    from datetime import datetime
+    tarefa = await tarefa_service.atualizar_tarefa(
+        tarefa_id,
+        {"status": "abandonada", "motivo_abandono": motivo, "data_abandono": datetime.now().isoformat()},
+        empresa_id
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    return tarefa
+
+
+@router.post("/{tarefa_id}/suspender", response_model=TarefaResponse)
+async def suspender_tarefa(tarefa_id: int, motivo: str = "", empresa_id: int = Query(1)):
+    from datetime import datetime
+    tarefa = await tarefa_service.atualizar_tarefa(
+        tarefa_id,
+        {"status": "suspensa", "motivo_suspensao": motivo, "data_suspensao": datetime.now().isoformat()},
+        empresa_id
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    return tarefa
+
+
+@router.post("/{tarefa_id}/finalizar", response_model=TarefaResponse)
+async def finalizar_tarefa(tarefa_id: int, empresa_id: int = Query(1)):
+    from datetime import datetime
+    tarefa = await tarefa_service.atualizar_tarefa(
+        tarefa_id,
+        {"status": "concluida", "coluna": "done", "data_conclusao": datetime.now().isoformat()},
+        empresa_id
+    )
     if not tarefa:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
     return tarefa

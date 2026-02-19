@@ -41,6 +41,17 @@ class TarefaCreate(BaseModel):
     
     tags: Optional[List[str]] = []
     created_by: Optional[int] = None
+    
+    status: str = "ativa"
+    sprint_id: Optional[int] = None
+    grupo_id: Optional[int] = None
+    observadores: Optional[List[int]] = []
+    previsao_entrega: Optional[date] = None
+    estimativa_horas_prevista: Optional[float] = None
+    data_inicio: Optional[datetime] = None
+    motivo_pausa: Optional[str] = None
+    motivo_suspensao: Optional[str] = None
+    motivo_abandono: Optional[str] = None
 
 
 class TarefaUpdate(BaseModel):
@@ -69,6 +80,21 @@ class TarefaUpdate(BaseModel):
     tempo_gasto_minutas: Optional[int] = None
     relatorio_horas: Optional[float] = None
     relatorio_custo: Optional[float] = None
+    
+    status: Optional[str] = None
+    sprint_id: Optional[int] = None
+    grupo_id: Optional[int] = None
+    observadores: Optional[List[int]] = None
+    previsao_entrega: Optional[date] = None
+    estimativa_horas_prevista: Optional[float] = None
+    data_inicio: Optional[datetime] = None
+    data_conclusao: Optional[datetime] = None
+    motivo_pausa: Optional[str] = None
+    motivo_suspensao: Optional[str] = None
+    motivo_abandono: Optional[str] = None
+    data_pausa: Optional[datetime] = None
+    data_suspensao: Optional[datetime] = None
+    data_abandono: Optional[datetime] = None
 
 
 class TarefaResponse(BaseModel):
@@ -100,6 +126,20 @@ class TarefaResponse(BaseModel):
     
     tags: List[str]
     embedding: Optional[Any] = None
+    
+    status: str = "ativa"
+    sprint_id: Optional[int] = None
+    grupo_id: Optional[int] = None
+    observadores: List[int] = []
+    previsao_entrega: Optional[date] = None
+    estimativa_horas_prevista: Optional[float] = None
+    data_inicio: Optional[datetime] = None
+    motivo_pausa: Optional[str] = None
+    motivo_suspensao: Optional[str] = None
+    motivo_abandono: Optional[str] = None
+    data_pausa: Optional[datetime] = None
+    data_suspensao: Optional[datetime] = None
+    data_abandono: Optional[datetime] = None
     
     created_at: datetime
     updated_at: datetime
