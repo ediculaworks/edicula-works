@@ -8,6 +8,20 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [4.0.0] - 2026-02-19
+
+### Adicionado
+- Frontend Next.js 16 (`frontend/`)
+  - Next.js 16.1.6 + React 19 + Tailwind CSS 4
+  - Design system com dark/light mode
+  - Componentes base: Button, Card, Input
+  - Layout: Sidebar, Header com theme toggle
+  - Página Dashboard com métricas
+  - Página Chat com 6 agentes
+  - Página Kanban com drag-and-drop
+
+---
+
 ## [3.2.0] - 2026-02-19
 
 ### Adicionado

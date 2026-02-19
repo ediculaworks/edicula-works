@@ -1,0 +1,131 @@
+// Tipos base para a aplicação EdiculaWorks
+
+// Enum de prioridades
+export type Prioridade = 'urgente' | 'alta' | 'media' | 'baixa'
+
+// Enum de colunas do Kanban
+export type ColunaKanban = 'todo' | 'in_progress' | 'review' | 'done'
+
+// Status de contratos
+export type StatusContrato = 'rascunho' | 'ativo' | 'expirado' | 'encerrado' | 'cancelado'
+
+// Tipos de transação
+export type TipoTransacao = 'receita' | 'despesa' | 'transferencia'
+export type StatusTransacao = 'pendente' | 'pago' | 'cancelado' | 'estornado'
+
+// Agentes do sistema
+export type Agente = 'chief' | 'tech' | 'gestao' | 'financeiro' | 'security' | 'ops'
+
+// Interfaces base
+export interface Usuario {
+  id: number
+  nome: string
+  email: string
+  avatar_url?: string
+  cargo?: string
+  role: 'admin' | 'manager' | 'member'
+  ativo: boolean
+}
+
+export interface Tarefa {
+  id: number
+  empresa_id: number
+  projeto_id?: number
+  titulo: string
+  descricao?: string
+  coluna: ColunaKanban
+  prioridade: Prioridade
+  estimativa_horas?: number
+  estimativa_pontos?: number
+  prazo?: string
+  data_conclusao?: string
+  tempo_gasto_minutos: number
+  responsaveis: number[]
+  created_by?: number
+  cliente_nome?: string
+  tarefa_pai_id?: number
+  eh_subtarefa: boolean
+  ordem: number
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface Projeto {
+  id: number
+  empresa_id: number
+  nome: string
+  descricao?: string
+  cor?: string
+  icone?: string
+  cliente_nome?: string
+  data_inicio?: string
+  data_fim?: string
+  status: 'ativo' | 'pausado' | 'arquivado' | 'concluido'
+  progresso: number
+  created_by?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Contrato {
+  id: number
+  empresa_id: number
+  titulo: string
+  descricao?: string
+  numero?: string
+  tipo: string
+  cliente_id?: number
+  fornecedor_id?: number
+  contraparte_nome?: string
+  valor?: number
+  valor_mensal?: number
+  periodicidade?: string
+  data_assinatura?: string
+  data_inicio?: string
+  data_fim?: string
+  status: StatusContrato
+  renovacao_automatica: boolean
+  arquivo_url?: string
+  created_by?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Transacao {
+  id: number
+  empresa_id: number
+  tipo: TipoTransacao
+  categoria_id?: number
+  centro_custo_id?: number
+  valor: number
+  descricao?: string
+  data_transacao: string
+  data_vencimento?: string
+  data_pagamento?: string
+  status: StatusTransacao
+  conta_bancaria_id?: number
+  contrato_id?: number
+  projeto_id?: number
+  created_by?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Conversa {
+  id: number
+  agente: Agente
+  titulo?: string
+  status: 'ativa' | 'arquivada' | 'excluida'
+  mensagens_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Mensagem {
+  id: number
+  conversa_id: number
+  role: 'user' | 'assistant' | 'system'
+  conteudo: string
+  created_at: string
+}
