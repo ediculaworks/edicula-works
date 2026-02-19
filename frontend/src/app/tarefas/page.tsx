@@ -28,6 +28,9 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { mockUsuarios, mockGrupos, mockSprints, mockTags } from "@/lib/mock-data"
+import { useTarefas } from "@/hooks/useTarefas"
+
+const EMPRESA_ID = 1
 
 const prioridades: { id: Prioridade; cor: string; label: string }[] = [
   { id: "urgente", cor: "#ef4444", label: "Urgente" },
@@ -230,7 +233,9 @@ function ContextMenu({ x, y, tarefa, onClose, onEdit, onDelete, onMove, onExport
 }
 
 export default function TarefasPage() {
-  const [tarefas, setTarefas] = useState<Tarefa[]>(tarefasExemplo)
+  const { tarefas: apiTarefas, loading, error, refetch, createTarefa, updateTarefa, deleteTarefa, iniciarTarefa, pausarTarefa, finalizarTarefa, abandonarTarefa } = useTarefas({ empresaId: EMPRESA_ID })
+  const [tarefas, setTarefas] = useState<Tarefa[]>([])
+  const [isApiConnected, setIsApiConnected] = useState(false)
   const [filtros, setFiltros] = useState<Filtros>({})
   const [tarefaSelecionada, setTarefaSelecionada] = useState<Tarefa | null>(null)
   const [showFilters, setShowFilters] = useState(false)
@@ -238,6 +243,24 @@ export default function TarefasPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [openInEditMode, setOpenInEditMode] = useState(false)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; tarefa: Tarefa } | null>(null)
+
+  useEffect(() => {
+    if (!loading) {
+      if (apiTarefas.length > 0) {
+        setTarefas(apiTarefas)
+        setIsApiConnected(true)
+      } else {
+        setTarefas(tarefasExemplo)
+        setIsApiConnected(false)
+      }
+    }
+  }, [apiTarefas, loading])
+
+  const handleRefetch = async () => {
+    if (isApiConnected) {
+      await refetch()
+    }
+  }
 
   const tarefasFiltradas = tarefas.filter((tarefa) => {
     if (filtros.busca && !tarefa.titulo.toLowerCase().includes(filtros.busca.toLowerCase())) {

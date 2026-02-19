@@ -18,6 +18,10 @@ import {
   Bot,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTarefas } from "@/hooks/useTarefas"
+import { mockUsuarios } from "@/lib/mock-data"
+
+const EMPRESA_ID = 1
 
 const recentTasks = [
   { id: 1, title: "Setup API REST", status: "done", priority: "alta", responsavel: "Lucas" },
@@ -73,8 +77,10 @@ const sectionVariants = {
 function getStatusStyle(status: string) {
   switch (status) {
     case "done":
+    case "concluida":
       return { bg: "bg-green-500/10", text: "text-green-500", icon: CheckCircle2 }
     case "in_progress":
+    case "review":
       return { bg: "bg-yellow-500/10", text: "text-yellow-500", icon: Clock }
     default:
       return { bg: "bg-gray-500/10", text: "text-gray-500", icon: Clock }
@@ -93,6 +99,21 @@ function getPriorityStyle(priority: string) {
 }
 
 export default function DashboardPage() {
+  const { tarefas: apiTarefas, loading } = useTarefas({ empresaId: EMPRESA_ID })
+
+  const tarefasAtivas = apiTarefas.filter(t => t.status === "ativa").length
+  const tarefasConcluidas = apiTarefas.filter(t => t.status === "concluida").length
+  const tarefasPausadas = apiTarefas.filter(t => t.status === "pausada").length
+  
+  const tarefasOrdenadas = [...apiTarefas]
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, 5)
+
+  function getUsuarioNome(id: number) {
+    const usuario = mockUsuarios.find(u => u.id === id)
+    return usuario?.nome || `User ${id}`
+  }
+
   return (
     <DashboardLayout>
       <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-12">
@@ -113,33 +134,40 @@ export default function DashboardPage() {
             </div>
             
             <div className="space-y-2">
-              {recentTasks.map((task, i) => {
-                const statusStyle = getStatusStyle(task.status)
-                const StatusIcon = statusStyle.icon
-                
-                return (
-                  <motion.div 
-                    key={task.id}
-                    className="flex items-center justify-between rounded-xl bg-[var(--surface-hover)] p-3 hover:bg-[var(--surface-hover)]/80 transition-colors"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn("p-1.5 rounded-lg", statusStyle.bg)}>
-                        <StatusIcon className={cn("h-3.5 w-3.5", statusStyle.text)} />
+              {loading ? (
+                <div className="text-center py-4 text-sm text-[var(--foreground)]/50">Carregando...</div>
+              ) : tarefasOrdenadas.length === 0 ? (
+                <div className="text-center py-4 text-sm text-[var(--foreground)]/50">Nenhuma tarefa encontrada</div>
+              ) : (
+                tarefasOrdenadas.map((task, i) => {
+                  const statusStyle = getStatusStyle(task.coluna)
+                  const StatusIcon = statusStyle.icon
+                  const responsavelNome = task.responsaveis?.[0] ? getUsuarioNome(task.responsaveis[0]) : "Sem responsável"
+                  
+                  return (
+                    <motion.div 
+                      key={task.id}
+                      className="flex items-center justify-between rounded-xl bg-[var(--surface-hover)] p-3 hover:bg-[var(--surface-hover)]/80 transition-colors"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn("p-1.5 rounded-lg", statusStyle.bg)}>
+                          <StatusIcon className={cn("h-3.5 w-3.5", statusStyle.text)} />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{task.titulo}</p>
+                          <p className="text-xs text-[var(--foreground)]/50">{responsavelNome}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{task.title}</p>
-                        <p className="text-xs text-[var(--foreground)]/50">{task.responsavel}</p>
-                      </div>
-                    </div>
-                    <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", getPriorityStyle(task.priority))}>
-                      {task.priority}
-                    </span>
-                  </motion.div>
-                )
-              })}
+                      <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", getPriorityStyle(task.prioridade))}>
+                        {task.prioridade}
+                      </span>
+                    </motion.div>
+                  )
+                })
+              )}
             </div>
           </motion.div>
 
