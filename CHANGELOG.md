@@ -12,12 +12,12 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ### Adicionado
 - Documento de Design do Frontend (`docs/frontend/DESIGN.md`)
-  - Design system (cores, tipografia, espaçamento)
-  - Arquitetura de componentes
-  - 10 páginas detalhadas (Chat, Kanban, Tarefas, Contratos, Financeiro, Projetos, Calendário, Dashboard, Monitor, Settings)
-  - Layouts mobile vs desktop
-  - PWA + Capacitor (App Store/Google Play)
-  - Roadmap de implementação
+- Padrões de Data e Hora (`docs/frontend/DATE_FORMATS.md`)
+  - Timezone: America/Sao_Paulo
+  - Formato ISO 8601 para API
+  - Formato brasileiro para display
+  - Funções helper Python e TypeScript
+  - Tabela de referência rápida
 
 ---
 
