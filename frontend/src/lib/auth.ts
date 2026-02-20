@@ -19,6 +19,7 @@ export const auth = betterAuth({
       updatedAt: "updated_at",
     },
   },
+  // Session config (com fields para snake_case)
   session: {
     fields: {
       userId: "user_id",
@@ -28,6 +29,13 @@ export const auth = betterAuth({
       ipAddress: "ip_address",
       userAgent: "user_agent",
     },
+    expiresIn: 60 * 60 * 24 * 7, // 7 dias
+    updateAge: 60 * 60 * 24,     // Atualiza cada 24h
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5, // 5 minutos
+    },
+  },
   },
   account: {
     fields: {
