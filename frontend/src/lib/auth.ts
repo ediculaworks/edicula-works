@@ -10,7 +10,7 @@ export const auth = betterAuth({
     options: "-c search_path=better_auth,public",
   }),
   
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL || "https://edicula.publicvm.com",
   secret: process.env.BETTER_AUTH_SECRET,
   
   // Email/Password
