@@ -141,22 +141,33 @@ ENVEOF
             fi
             ;;
         8)  log_info "Instalando PostgreSQL client e configurando schema..."
-            apt install -y postgresql-client
-            git config --global --add safe.directory "$PROJECT_DIR"
+            apt install -y postgresql-client -qq
+            git config --global --add safe.directory "$PROJECT_DIR" 2>/dev/null || true
             
             DB_URL=$(grep DATABASE_URL "$PROJECT_DIR/api/.env" | cut -d'=' -f2-)
             
             log_info "Criando schema Better Auth..."
             
-            # Extrair senha do DATABASE_URL
+            # Extrair componentes do DATABASE_URL
             DB_HOST=$(echo "$DB_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
             DB_PORT=$(echo "$DB_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
             DB_NAME=$(echo "$DB_URL" | sed -n 's|.*/\([^?]*\).*|\1|p')
             DB_USER=$(echo "$DB_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
             DB_PASS=$(echo "$DB_URL" | sed -n 's|.*://\([^:]*\)@.*|\1|p' | head -1)
             
+            log_info "Conectando ao banco: $DB_HOST:$DB_PORT"
+            
+            # Limpar tabelas existentes primeiro
             PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "
-                CREATE TABLE IF NOT EXISTS public.\"user\" (
+                DROP TABLE IF EXISTS public.session CASCADE;
+                DROP TABLE IF EXISTS public.account CASCADE;
+                DROP TABLE IF EXISTS public.verification CASCADE;
+                DROP TABLE IF EXISTS public.user CASCADE;
+            " 2>&1 || true
+            
+            # Criar tabelas Better Auth (sem REFERENCES para evitar problemas)
+            PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "
+                CREATE TABLE IF NOT EXISTS public.user (
                     id TEXT PRIMARY KEY,
                     name TEXT,
                     email TEXT UNIQUE NOT NULL,
@@ -168,7 +179,7 @@ ENVEOF
                 
                 CREATE TABLE IF NOT EXISTS public.session (
                     id TEXT PRIMARY KEY,
-                    user_id TEXT NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
+                    user_id TEXT NOT NULL,
                     expires_at TIMESTAMPTZ NOT NULL,
                     token TEXT,
                     ip_address TEXT,
@@ -179,7 +190,7 @@ ENVEOF
                 
                 CREATE TABLE IF NOT EXISTS public.account (
                     id TEXT PRIMARY KEY,
-                    user_id TEXT NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
+                    user_id TEXT NOT NULL,
                     account_id TEXT,
                     provider_id TEXT,
                     access_token TEXT,
@@ -202,12 +213,12 @@ ENVEOF
                     updated_at TIMESTAMPTZ DEFAULT NOW()
                 );
                 
-                CREATE INDEX IF NOT EXISTS idx_user_email ON public.\"user\"(email);
+                CREATE INDEX IF NOT EXISTS idx_user_email ON public.user(email);
                 CREATE INDEX IF NOT EXISTS idx_session_user_id ON public.session(user_id);
                 CREATE INDEX IF NOT EXISTS idx_session_expires_at ON public.session(expires_at);
                 CREATE INDEX IF NOT EXISTS idx_account_user_id ON public.account(user_id);
                 CREATE INDEX IF NOT EXISTS idx_verification_identifier ON public.verification(identifier);
-            " 2>&1 || log_warn "Schema pode já existir"
+            "
             
             log_info "Schema Better Auth configurado ✓"
             ;;
