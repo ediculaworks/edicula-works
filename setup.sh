@@ -165,7 +165,12 @@ EOF
             rm -f /etc/nginx/sites-enabled/default
             nginx -t && systemctl enable nginx && systemctl restart nginx
             ;;
-        12) cd "$PROJECT_DIR" && docker compose up -d
+        12) cd "$PROJECT_DIR"
+            git config --global --add safe.directory "$PROJECT_DIR"
+            git pull
+            docker compose down 2>/dev/null || true
+            docker compose build
+            docker compose up -d
             log_info "Containers iniciados"
             docker compose ps
             ;;
