@@ -9,6 +9,7 @@ Guia passo-a-passo para configurar a VPS do zero.
 | Item | Valor |
 |------|-------|
 | IP | 31.97.164.206 |
+| Domínio | edicula.publicvm.com |
 | OS | Ubuntu 24.04 |
 | RAM | 4GB |
 | CPU | 2 vCPU |
@@ -276,7 +277,7 @@ PORT=8000
 HOST=0.0.0.0
 
 # CORS
-CORS_ORIGINS=["https://ediculaworks.com"]
+CORS_ORIGINS=["https://edicula.publicvm.com"]
 EOF
 
 # Criar arquivo de ambiente para o Frontend
@@ -286,11 +287,11 @@ DATABASE_URL=postgresql://postgres.blipomkndlrewoftvjao:lLCpckkKykNBZFCE@aws-0-s
 
 # Better Auth
 BETTER_AUTH_SECRET=ediculaworks-secret-key-min-32-characters-1234567890
-BETTER_AUTH_URL=https://ediculaworks.com
+BETTER_AUTH_URL=https://edicula.publicvm.com
 
 # API
-NEXT_PUBLIC_API_URL=https://ediculaworks.com/api
-NEXT_PUBLIC_BETTER_AUTH_URL=https://ediculaworks.com
+NEXT_PUBLIC_API_URL=https://edicula.publicvm.com/api
+NEXT_PUBLIC_BETTER_AUTH_URL=https://edicula.publicvm.com
 EOF
 
 # Proteger arquivos
