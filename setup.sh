@@ -30,12 +30,13 @@ usage() {
     echo "  5             Instalar Docker"
     echo "  6             Clonar Repositório"
     echo "  7             Configurar Variáveis de Ambiente"
-    echo "  8             Configurar OpenClaw"
-    echo "  9             Build Docker"
-    echo "  10            Configurar SSL"
-    echo "  11            Configurar Nginx"
-    echo "  12            Iniciar Containers"
-    echo "  13            Configurar Chave SSH"
+    echo "  8             Configurar Better Auth (schema + admin)"
+    echo "  9             Configurar OpenClaw"
+    echo "  10            Build Docker"
+    echo "  11            Configurar SSL"
+    echo "  12            Configurar Nginx"
+    echo "  13            Iniciar Containers"
+    echo "  14            Configurar Chave SSH"
     echo "  status        Ver status dos serviços"
     echo "  restart       Reiniciar serviços"
     echo ""
@@ -55,7 +56,7 @@ run_module() {
     local name="$2"
     local func="$3"
     
-    log_info "[$num/$12] $name"
+    log_info "[$num/14] $name"
     
     case "$num" in
         1)  apt update && apt upgrade -y
@@ -139,7 +140,72 @@ ENVEOF
                 chmod 600 "$PROJECT_DIR/api/.env" "$PROJECT_DIR/frontend/.env.local"
             fi
             ;;
-        8)  mkdir -p /etc/openclaw
+        8)  log_info "Instalando PostgreSQL client e configurando schema..."
+            apt install -y postgresql-client
+            git config --global --add safe.directory "$PROJECT_DIR"
+            
+            DB_URL=$(grep DATABASE_URL "$PROJECT_DIR/api/.env" | cut -d'=' -f2-)
+            
+            log_info "Criando schema Better Auth..."
+            PGPASSWORD=$(echo "$DB_URL" | grep -oP '(?<=:)[^@]+(?=@)') psql "$DB_URL" -c "
+                CREATE SCHEMA IF NOT EXISTS better_auth;
+                
+                CREATE TABLE IF NOT EXISTS better_auth.\"user\" (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    name VARCHAR(255),
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    email_verified BOOLEAN DEFAULT false,
+                    image VARCHAR(500),
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                
+                CREATE TABLE IF NOT EXISTS better_auth.session (
+                    id VARCHAR(255) PRIMARY KEY,
+                    user_id UUID NOT NULL REFERENCES better_auth.\"user\"(id) ON DELETE CASCADE,
+                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    token VARCHAR(255),
+                    ip_address VARCHAR(45),
+                    user_agent TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                
+                CREATE TABLE IF NOT EXISTS better_auth.account (
+                    id VARCHAR(255) PRIMARY KEY,
+                    user_id UUID NOT NULL REFERENCES better_auth.\"user\"(id) ON DELETE CASCADE,
+                    account_id VARCHAR(255),
+                    provider_id VARCHAR(255),
+                    access_token TEXT,
+                    refresh_token TEXT,
+                    access_token_expires_at TIMESTAMP WITH TIME ZONE,
+                    refresh_token_expires_at TIMESTAMP WITH TIME ZONE,
+                    scope TEXT,
+                    id_token TEXT,
+                    password VARCHAR(255),
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                
+                CREATE TABLE IF NOT EXISTS better_auth.verification (
+                    id VARCHAR(255) PRIMARY KEY,
+                    identifier VARCHAR(255) NOT NULL,
+                    value VARCHAR(255) NOT NULL,
+                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                
+                CREATE INDEX IF NOT EXISTS idx_user_email ON better_auth.\"user\"(email);
+                CREATE INDEX IF NOT EXISTS idx_session_user_id ON better_auth.session(user_id);
+                CREATE INDEX IF NOT EXISTS idx_account_user_id ON better_auth.account(user_id);
+            " || log_warn "Schema pode já existir"
+            
+            log_info "Criando usuário admin..."
+            psql "$DB_URL" -c "INSERT INTO better_auth.\"user\" (name, email, email_verified) VALUES ('Admin', 'admin@ediculaworks.com', true) ON CONFLICT (email) DO NOTHING;" || true
+            log_info "Schema Better Auth configurado ✓"
+            ;;
+        9)  mkdir -p /etc/openclaw
             if [ ! -f "/etc/openclaw/env" ]; then
                 read -p "OPENROUTER_API_KEY: " OPENROUTER_KEY
                 cat > /etc/openclaw/env << EOF
@@ -196,7 +262,7 @@ EOF
 
 case "$MODULE" in
     all)
-        for i in $(seq 1 13); do
+        for i in $(seq 1 14); do
             run_module $i "Step $i" func
         done
         log_info "Setup completo!"
