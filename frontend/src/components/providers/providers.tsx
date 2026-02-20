@@ -2,17 +2,14 @@
 
 import { usePathname } from "next/navigation"
 import { ThemeProvider } from "@/components/providers/theme-provider"
-import { SessionProvider } from "@/components/providers/session-provider"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <SessionProvider>
-        <PageTransitionWrapper>
-          {children}
-        </PageTransitionWrapper>
-      </SessionProvider>
+      <PageTransitionWrapper>
+        {children}
+      </PageTransitionWrapper>
     </ThemeProvider>
   )
 }

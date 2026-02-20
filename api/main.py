@@ -24,7 +24,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:18789", "https://edicula.publicvm.com"],
+    allow_origins=["http://localhost:3000", "http://localhost:18789", "https://edihub.work.gd", "http://edihub.work.gd"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

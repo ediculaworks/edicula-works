@@ -24,9 +24,8 @@ export type Agente = 'chief' | 'tech' | 'gestao' | 'financeiro' | 'security' | '
 
 // Interfaces base
 export interface Usuario {
-  id: string  // UUID
+  id: string
   empresa_id?: number
-  auth_user_id?: string  // UUID do Better Auth
   nome: string
   email: string
   username?: string
