@@ -710,76 +710,8 @@ CREATE TABLE contas_bancarias (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Transações
-CREATE TABLE transacoes (
-    id SERIAL PRIMARY KEY,
-    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    
-    -- Tipo
-    tipo VARCHAR(20) NOT NULL, -- receita, despesa, transferencia
-    
-    -- Categoria
-    categoria_id INTEGER REFERENCES categorias_financeiras(id),
-    centro_custo_id INTEGER REFERENCES centros_custo(id),
-    
-    -- Valores
-    valor DECIMAL(12,2) NOT NULL,
-    valor_original DECIMAL(12,2),
-    moeda_original VARCHAR(10),
-    cambio DECIMAL(10,4) DEFAULT 1,
-    
-    -- Descrição
-    descricao TEXT,
-    descricao_detalhada TEXT,
-    
-    -- Datas
-    data_transacao DATE NOT NULL,
-    data_vencimento DATE,
-    data_pagamento DATE,
-    data_competencia DATE,
-    
-    -- Status
-    status VARCHAR(20) DEFAULT 'pendente', -- pendente, pago, cancelado, estornado
-    
-    -- Conta
-    conta_bancaria_id INTEGER REFERENCES contas_bancarias(id),
-    
-    -- Referências
-    contrato_id INTEGER REFERENCES contratos(id),
-    projeto_id INTEGER REFERENCES projetos(id),
-    tarefa_id INTEGER REFERENCES tarefas(id),
-    fatura_id INTEGER REFERENCES faturas(id),
-    orcamento_id INTEGER REFERENCES orcamentos(id),
-    
-    -- Documento
-    documento_tipo VARCHAR(50),
-    documento_numero VARCHAR(100),
-    documento_url VARCHAR(500),
-    
-    -- Recorrência
-    recorrente BOOLEAN DEFAULT false,
-    transacao_pai_id INTEGER REFERENCES transacoes(id),
-    
-    -- Fornecedor/Cliente
-    fornecedor_id INTEGER REFERENCES fornecedores(id),
-    cliente_id INTEGER REFERENCES clientes(id),
-    pessoa_nome VARCHAR(255),
-    
-    -- Observações
-    observacoes TEXT,
-    
-    -- Tags
-    tags TEXT[],
-    
-    -- Embedding
-    embedding vector(1536),
-    
-    created_by UUID REFERENCES usuarios(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Faturas (Recebidas e Emitidas)
+-- Deve ser criado ANTES de transacoes pois é referenciado
 CREATE TABLE faturas (
     id SERIAL PRIMARY KEY,
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
@@ -861,6 +793,7 @@ CREATE TABLE fatura_itens (
 );
 
 -- Orçamentos
+-- Deve ser criado ANTES de transacoes pois é referenciado
 CREATE TABLE orcamentos (
     id SERIAL PRIMARY KEY,
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
@@ -922,6 +855,75 @@ CREATE TABLE orcamento_itens (
     ordem INTEGER DEFAULT 0,
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Transações
+CREATE TABLE transacoes (
+    id SERIAL PRIMARY KEY,
+    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
+    
+    -- Tipo
+    tipo VARCHAR(20) NOT NULL, -- receita, despesa, transferencia
+    
+    -- Categoria
+    categoria_id INTEGER REFERENCES categorias_financeiras(id),
+    centro_custo_id INTEGER REFERENCES centros_custo(id),
+    
+    -- Valores
+    valor DECIMAL(12,2) NOT NULL,
+    valor_original DECIMAL(12,2),
+    moeda_original VARCHAR(10),
+    cambio DECIMAL(10,4) DEFAULT 1,
+    
+    -- Descrição
+    descricao TEXT,
+    descricao_detalhada TEXT,
+    
+    -- Datas
+    data_transacao DATE NOT NULL,
+    data_vencimento DATE,
+    data_pagamento DATE,
+    data_competencia DATE,
+    
+    -- Status
+    status VARCHAR(20) DEFAULT 'pendente', -- pendente, pago, cancelado, estornado
+    
+    -- Conta
+    conta_bancaria_id INTEGER REFERENCES contas_bancarias(id),
+    
+    -- Referências
+    contrato_id INTEGER REFERENCES contratos(id),
+    projeto_id INTEGER REFERENCES projetos(id),
+    tarefa_id INTEGER REFERENCES tarefas(id),
+    fatura_id INTEGER REFERENCES faturas(id),
+    orcamento_id INTEGER REFERENCES orcamentos(id),
+    
+    -- Documento
+    documento_tipo VARCHAR(50),
+    documento_numero VARCHAR(100),
+    documento_url VARCHAR(500),
+    
+    -- Recorrência
+    recorrente BOOLEAN DEFAULT false,
+    transacao_pai_id INTEGER REFERENCES transacoes(id),
+    
+    -- Fornecedor/Cliente
+    fornecedor_id INTEGER REFERENCES fornecedores(id),
+    cliente_id INTEGER REFERENCES clientes(id),
+    pessoa_nome VARCHAR(255),
+    
+    -- Observações
+    observacoes TEXT,
+    
+    -- Tags
+    tags TEXT[],
+    
+    -- Embedding
+    embedding vector(1536),
+    
+    created_by UUID REFERENCES usuarios(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Metas Financeiras
