@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import os
 
 from api.routes import health
+from api.routes import projetos, tarefas, grupos, sprints, tags, usuarios, contratos, transacoes, search
 from api.database import engine, Base
 
 
@@ -31,6 +32,15 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api", tags=["Health"])
+app.include_router(projetos.router, prefix="/api/projetos", tags=["Projetos"])
+app.include_router(tarefas.router, prefix="/api/tarefas", tags=["Tarefas"])
+app.include_router(grupos.router, prefix="/api/grupos", tags=["Grupos"])
+app.include_router(sprints.router, prefix="/api/sprints", tags=["Sprints"])
+app.include_router(tags.router, prefix="/api/tags", tags=["Tags"])
+app.include_router(usuarios.router, prefix="/api/usuarios", tags=["Usuarios"])
+app.include_router(contratos.router, prefix="/api/contratos", tags=["Contratos"])
+app.include_router(transacoes.router, prefix="/api/transacoes", tags=["Transacoes"])
+app.include_router(search.router, prefix="/api/search", tags=["Search"])
 
 
 @app.get("/")
