@@ -1,156 +1,229 @@
-# Sistema Interno EdiculaWorks
+# EdiculaWorks Platform
 
-Sistema de gestão empresarial inteligente com agentes de IA, desenvolvido internamente pela equipe EdiculaWorks.
-
-> **Nota**: Este sistema ainda não tem um nome definido. Fique à vontade para sugerir!
+Sistema de gestão empresarial inteligente com agentes de IA integrados.
 
 ---
 
-## O que é este sistema?
+## Visão Geral
 
-É uma plataforma completa para gestão de tarefas, contratos e projetos da empresa, potencializada por inteligência artificial. Think of it as um assistente virtual que ajuda a equipe com organização, análise financeira, gestão de contratos e muito mais.
-
----
-
-## Funcionalidades
-
-### 🤖 Agentes Inteligentes
-
-A plataforma conta com múltiplos agentes especializados que trabalham juntos:
-
-| Agente | Função |
-|--------|--------|
-| **Chief** | Coordenador geral - direciona suas solicitações para o agente certo |
-| **Tech Lead** | Ajuda com código, infraestrutura e questões técnicas |
-| **Gestao Lead** | Gerencia tarefas, projetos e o quadro Kanban |
-| **Financeiro Lead** | Analisa custos, controla orçamento e gerencia contratos |
-| **Security Lead** | Cuida da segurança e conformidade |
-| **Ops Lead** | Monitoramento, backup e manutenção |
-
-### 📋 Kanban
-
-Quadro visual de tarefas com colunas:
-
-- **A Fazer** (todo)
-- **Em Andamento** (in_progress)
-- **Em Revisão** (review)
-- **Concluída** (done)
-
-Prioridades: Urgente → Alta → Média → Baixa
-
-### 📄 Contratos
-
-Gestão completa de contratos com:
-
-- Tipos: NDA, Serviço, Parceria, Outro
-- Status: Rascunho → Ativo → Expirado → Encerrado
-- Busca semântica para encontrar contratos relacionados
-
-### 💰 Financeiro
-
-Controle de receitas e despesas com:
-
-- Categorias personalizáveis
-- Relatórios por período
-- Vinculação a contratos e tarefas
-
-### 🔍 Busca Semântica
-
-Sistema inteligente que encontra tarefas e contratos relacionados, mesmo usando palavras diferentes. Ex: busca por "problema com pagamento" encontra contratos de pagamento.
+EdiculaWorks é uma plataforma completa para gestão de tarefas, projetos, contratos e finanças, potencializada por inteligência artificial. O sistema integra um quadro Kanban, controle financeiro, gestão de contratos e múltiplos agentes de IA que auxiliam a equipe nas atividades diárias.
 
 ---
 
 ## Arquitetura
 
 ```
-┌─────────────────────────────┐
-│      Aplicação Web         │
-│     (Next.js - Futuro)     │
-└─────────────┬───────────────┘
-              │
-┌─────────────▼───────────────┐
-│        API (FastAPI)        │
-│   BACKEND + AGENTES IA      │
-└─────────────┬───────────────┘
-              │
-┌─────────────▼───────────────┐
-│      Supabase               │
-│  (PostgreSQL + pgVector)    │
-└─────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                      Nginx (SSL)                        │
+│                  Reverse Proxy                          │
+└─────────────┬─────────────┬─────────────┬───────────────┘
+              │             │             │
+    ┌─────────▼───┐ ┌───────▼─────┐ ┌─────▼──────────┐
+    │   Frontend  │ │     API     │ │    OpenClaw    │
+    │  Next.js    │ │   FastAPI   │ │   Agentes IA   │
+    └─────────────┘ └─────────────┘ └────────────────┘
+              │             │
+              └──────┬──────┘
+                     │
+              ┌──────▼──────┐
+              │  Supabase   │
+              │ PostgreSQL  │
+              │  + pgVector │
+              └─────────────┘
 ```
 
 ### Stack Tecnológica
 
-- **Frontend**: Next.js (em desenvolvimento)
-- **Backend**: FastAPI (Python)
-- **Banco de Dados**: Supabase (PostgreSQL + pgVector)
-- **IA**: OpenClaw com OpenRouter
-- **Infraestrutura**: VPS Ubuntu + Docker
+| Camada | Tecnologia |
+|--------|------------|
+| Frontend | Next.js 16, React 19, Tailwind CSS |
+| Backend | FastAPI (Python 3.12) |
+| Banco de Dados | Supabase (PostgreSQL + pgVector) |
+| Autenticação | Better Auth |
+| IA | OpenClaw + OpenRouter |
+| Infraestrutura | Docker, Nginx, Ubuntu 24.04 |
 
 ---
 
-## Como Usar
+## Funcionalidades
 
-### Falando com os Agentes
+### Autenticação e Controle de Acesso
 
-Você pode interagir com os agentes de diferentes formas:
+Sistema de autenticação completo com Better Auth:
 
-1. **Via Chat Web** (quando disponível)
-2. **Via Terminal** (acesso SSH)
-3. **Via Tailscale** (acesso remoto seguro)
+- Login por email/senha
+- OAuth com Google e GitHub (opcional)
+- Sessões persistentes com JWT
+- Controle de acesso baseado em perfis (RBAC)
 
-### Exemplos de Comandos
+**Perfis disponíveis:**
 
-| O que você quer | Agent |
-|-----------------|-------|
-| "Crie uma tarefa para o Lucas" | Gestao Lead |
-| "Liste minhas tarefas de hoje" | Gestao Lead |
-| "Quanto gastamos em janeiro?" | Financeiro Lead |
-| "Revise o contrato X" | Financeiro Lead |
-| "Ajude com um script Python" | Tech Lead |
-| "Verifique a segurança do servidor" | Security Lead |
+| Perfil | Acesso |
+|--------|--------|
+| Administrador | Completo |
+| Gerente | Projetos, tarefas, relatórios |
+| Desenvolvedor | Tarefas atribuídas |
+| Visualizador | Apenas leitura |
+
+### Kanban
+
+Quadro visual de tarefas com:
+
+- **Colunas:** A Fazer → Em Andamento → Em Revisão → Concluída
+- **Prioridades:** Urgente, Alta, Média, Baixa
+- **Organização:** Grupos, Sprints, Tags
+- **Funcionalidades:** Drag-and-drop, filtros, estimativas
+
+### Gestão de Projetos
+
+- Projetos com orçamento e prazos
+- Tarefas e subtarefas
+- Comentários e anexos
+- Time tracking
+- Dependências entre tarefas
+
+### Financeiro
+
+- Controle de receitas e despesas
+- Categorias personalizáveis
+- Contratos com alertas de vencimento
+- Faturas e cobranças
+- Relatórios por período
+
+### Busca Semântica
+
+Sistema de busca inteligente utilizando pgVector:
+
+- Encontra documentos relacionados mesmo com palavras diferentes
+- Ex: "problema com pagamento" encontra contratos de "pagamento"
+- Indexação automática de tarefas, contratos e documentos
+
+### Agentes de IA (OpenClaw)
+
+A plataforma conta com múltiplos agentes especializados:
+
+| Agente | Especialidade |
+|--------|---------------|
+| **Chief** | Coordenador geral, direciona solicitações |
+| **Tech Lead** | Código, infraestrutura, debugging |
+| **Gestão** | Tarefas, projetos, organização |
+| **Financeiro** | Custos, orçamento, análises |
+| **Security** | Segurança, auditoria, conformidade |
+| **Ops** | Monitoramento, backups, manutenção |
+
+Os agentes podem ser acionados via chat web, terminal ou integrações.
+
+---
+
+## Estrutura do Projeto
+
+```
+EdiculaWorks/
+├── api/                    # Backend FastAPI
+│   ├── routes/            # Endpoints REST
+│   ├── services/          # Lógica de negócio
+│   ├── schemas/           # Modelos Pydantic
+│   └── middleware/        # Autenticação, CORS
+│
+├── frontend/              # Frontend Next.js
+│   ├── src/
+│   │   ├── app/          # Páginas (App Router)
+│   │   ├── components/   # Componentes React
+│   │   ├── hooks/        # Hooks customizados
+│   │   └── lib/          # Utilitários e API client
+│
+├── config/                # Configurações
+│   └── nginx.conf        # Reverse proxy
+│
+├── docs/                  # Documentação técnica
+│   └── platform/
+│       ├── BLUEPRINT.md  # Visão arquitetural
+│       ├── DATABASE.md   # Schema do banco
+│       └── schema.sql    # Scripts SQL
+│
+├── docker-compose.yml     # Orquestração de containers
+└── .env.example          # Template de variáveis
+```
+
+---
+
+## Banco de Dados
+
+O sistema utiliza PostgreSQL com as seguintes extensões:
+
+- **pgcrypto** - Criptografia
+- **uuid-ossp** - Geração de UUIDs
+- **vector** - Busca semântica (pgVector)
+
+### Principais Tabelas
+
+| Módulo | Tabelas |
+|--------|---------|
+| Core | empresas, usuarios, perfis |
+| Tarefas | tarefas, grupos, sprints, tags |
+| Projetos | projetos, comentarios, anexos |
+| Financeiro | transacoes, faturas, orcamentos |
+| Contratos | contratos, documentos |
 
 ---
 
 ## Segurança
 
-- 🔒 Criptografia de dados
-- 🔑 Autenticação por chave SSH
-- 🛡️ Firewall e Fail2Ban
-- 📦 Ambiente sandbox (Docker)
-- 💾 Backup criptografado diário
-- 🌐 Acesso via VPN (Tailscale)
+O sistema implementa múltiplas camadas de segurança:
+
+- **Autenticação:** JWT com rotação de tokens
+- **Autorização:** RBAC com permissões granulares
+- **Criptografia:** HTTPS, dados sensíveis criptografados
+- **Rate Limiting:** Proteção contra abuso (Nginx)
+- **Isolamento:** Containers Docker com privilégios mínimos
+- **Headers de Segurança:** CSP, HSTS, X-Frame-Options
 
 ---
 
-## Custos
+## Integrações
 
-> Em definição - valores serão definidos posteriormente.
+### Supabase
+
+- PostgreSQL gerenciado
+- Autenticação suplementar
+- Storage para arquivos
+- Realtime (futuro)
+
+### OpenRouter
+
+- Acesso a múltiplos modelos de IA
+- Fallback automático entre modelos
+- Otimização de custos
+
+### OAuth Providers
+
+- Google (opcional)
+- GitHub (opcional)
 
 ---
 
 ## Documentação
 
-Para desenvolvedores:
-
-| Arquivo | O que contém |
-|---------|-------------|
-| [docs/platform/BLUEPRINT.md](docs/platform/BLUEPRINT.md) | Visão técnica completa |
-| [docs/platform/DATABASE.md](docs/platform/DATABASE.md) | Schema do banco de dados |
-| [docs/infra/seguranca.md](docs/infra/seguranca.md) | Boas práticas de segurança |
-| [REGRAS.md](REGRAS.md) | Regras de desenvolvimento |
+| Documento | Descrição |
+|-----------|-----------|
+| [BLUEPRINT.md](docs/platform/BLUEPRINT.md) | Visão técnica completa |
+| [DATABASE.md](docs/platform/DATABASE.md) | Schema e relacionamentos |
+| [seguranca.md](docs/infra/seguranca.md) | Boas práticas de segurança |
+| [REGRAS.md](REGRAS.md) | Padrões de desenvolvimento |
 | [CHANGELOG.md](CHANGELOG.md) | Histórico de mudanças |
 
 ---
 
 ## Equipe
 
-- **Lucas Drummond** - Desenvolvedor
-- **Matheus Guim** - Desenvolvedor
-- **Luca Junqueira** - Desenvolvedor
-- **João Pedro Santana** - Desenvolvedor
-- **Gabriel Fonseca** - Desenvolvedor
-- **Guilherme Sad** - Desenvolvedor
+Desenvolvido internamente pela equipe EdiculaWorks:
+
+- Lucas Drummond
+- Matheus Guim
+- Luca Junqueira
+- João Pedro Santana
+- Gabriel Fonseca
+- Guilherme Sad
 
 ---
 

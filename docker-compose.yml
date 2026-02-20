@@ -1,6 +1,57 @@
 version: '3.8'
 
 services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: edicula-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ./api/.env
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - edicula-network
+    security_opt:
+      - no-new-privileges:true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: edicula-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - ./frontend/.env.local
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://api:8000/api
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - edicula-network
+    security_opt:
+      - no-new-privileges:true
+
   openclaw:
     image: openclaw/openclaw:latest
     container_name: edicula-openclaw
@@ -15,26 +66,22 @@ services:
       - openclaw-data:/var/lib/openclaw
       - openclaw-logs:/var/log/openclaw
     user: "1000:1000"
-    networks:
-      - edicula-network
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:18789/api/health", "||", "curl", "-f", "http://localhost:18789/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - edicula-network
     security_opt:
       - no-new-privileges:true
     read_only: true
     tmpfs:
       - /tmp:size=100M,mode=1777
-    cap_drop:
-      - ALL
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: edicula-nginx
     restart: unless-stopped
     ports:
@@ -46,19 +93,25 @@ services:
       - nginx-logs:/var/log/nginx
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-      - openclaw
-    networks:
-      - edicula-network
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      openclaw:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "nginx", "-t"]
       interval: 30s
       timeout: 5s
       retries: 3
+    networks:
+      - edicula-network
+    security_opt:
+      - no-new-privileges:true
 
 networks:
   edicula-network:
     driver: bridge
-    internal: false
 
 volumes:
   openclaw-data:
