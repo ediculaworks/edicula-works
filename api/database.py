@@ -1,5 +1,4 @@
 from supabase import create_client, Client
-from supabase.lib.client_options import ClientOptions
 from typing import Optional
 import os
 from dotenv import load_dotenv
@@ -24,10 +23,6 @@ class Database:
             cls._instance = create_client(
                 supabase_url,
                 supabase_key,
-                options=ClientOptions(
-                    auto_refresh_token=False,
-                    persist_session=False,
-                )
             )
 
         return cls._instance
