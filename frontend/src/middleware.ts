@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Rotas públicas (não exigem autenticação)
+// Rotas públicas
 const publicRoutes = ["/login"];
 
-// Rotas de API e arquivos estáticos
+// Paths excluídos
 const excludedPaths = [
   "/api",
   "/_next",
@@ -24,32 +24,17 @@ export async function middleware(request: NextRequest) {
   // Verificar se é rota pública
   const isPublicRoute = publicRoutes.includes(pathname);
   
-  // Obter sessão do cookie
-  const sessionCookie = request.cookies.get("better-auth.session_token");
-  const isAuthenticated = !!sessionCookie?.value;
+  // Verificar se usuário foi selecionado (via header_CLIENT-side)
+  // O cliente define um cookie quando seleciona o membro
+  const userCookie = request.cookies.get("edicula_user");
   
-  // Se não autenticado e rota protegida
-  if (!isAuthenticated && !isPublicRoute) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+  // Para rotas públicas, permitir acesso
+  if (isPublicRoute) {
+    return NextResponse.next();
   }
   
-  // Se autenticado e tentando acessar login
-  if (isAuthenticated && pathname === "/login") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-  
-  // Redirecionar raiz para dashboard
-  if (pathname === "/" && isAuthenticated) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-  
-  // Se não autenticado e na raiz, redirecionar para login
-  if (pathname === "/" && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-  
+  // Se não tem usuário selecionado, permitir acesso (sem auth)
+  // O sistema é aberto - qualquer um pode acessar
   return NextResponse.next();
 }
 
