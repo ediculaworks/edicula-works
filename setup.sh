@@ -35,6 +35,7 @@ usage() {
     echo "  10            Configurar SSL"
     echo "  11            Configurar Nginx"
     echo "  12            Iniciar Containers"
+    echo "  13            Configurar Chave SSH"
     echo "  status        Ver status dos serviços"
     echo "  restart       Reiniciar serviços"
     echo ""
@@ -107,11 +108,16 @@ EOF
             chown -R "$USER:$USER" "$PROJECT_DIR"
             ;;
         7)  if [ ! -f "$PROJECT_DIR/api/.env" ]; then
-                read -p "DATABASE_URL: " DB_URL
-                read -p "SUPABASE_URL: " SUPA_URL
-                read -p "SUPABASE_ANON_KEY: " SUPA_KEY
-                read -p "SUPABASE_SERVICE_KEY: " SUPA_SERVICE
-                read -p "BETTER_AUTH_SECRET: " AUTH_SECRET
+                read -p "DATABASE_URL (ENTER=padrão): " DB_URL
+                DB_URL=${DB_URL:-postgresql://postgres:lLCpckkKykNBZFCE@db.blipomkndlrewoftvjao.supabase.co:5432/postgres}
+                read -p "SUPABASE_URL (ENTER=padrão): " SUPA_URL
+                SUPA_URL=${SUPA_URL:-https://blipomkndlrewoftvjao.supabase.co}
+                read -p "SUPABASE_ANON_KEY (ENTER=padrão): " SUPA_KEY
+                SUPA_KEY=${SUPA_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaXBvbWtuZGxyZXdvZnR2amFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODE4MjAsImV4cCI6MjA4NTY1NzgyMH0.uJB3_OHR2wMrALSSj7S_uNI_F8yjo3MLVaBsyjQ-oXE}
+                read -p "SUPABASE_SERVICE_KEY (ENTER=padrão): " SUPA_SERVICE
+                SUPA_SERVICE=${SUPA_SERVICE:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaXBvbWtuZGxyZXdvZnR2amFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDA4MTgyMCwiZXhwIjoyMDg1NjU3ODIwfQ.fMBPEqq0IjVNkU25OqiAzvm4vkBr1hJDrBQ4_K-O6HE}
+                read -p "BETTER_AUTH_SECRET (ENTER=padrão): " AUTH_SECRET
+                AUTH_SECRET=${AUTH_SECRET:-ediculaworks-secret-key-min-32-characters-1234567890}
                 
                 cat > "$PROJECT_DIR/api/.env" << ENVEOF
 SUPABASE_URL=$SUPA_URL
@@ -163,6 +169,20 @@ EOF
             log_info "Containers iniciados"
             docker compose ps
             ;;
+        13) log_info "Configurando chave SSH..."
+            mkdir -p /home/$USER/.ssh
+            chmod 700 /home/$USER/.ssh
+            
+            if [ ! -f "/home/$USER/.ssh/authorized_keys" ]; then
+                read -p "Cole sua chave SSH pública: " SSH_KEY
+                echo "$SSH_KEY" > /home/$USER/.ssh/authorized_keys
+            fi
+            
+            chmod 600 /home/$USER/.ssh/authorized_keys
+            chown -R $USER:$USER /home/$USER/.ssh
+            
+            log_info "Chave SSH configurada ✓"
+            ;;
     esac
     
     log_info "$name ✓"
@@ -170,7 +190,7 @@ EOF
 
 case "$MODULE" in
     all)
-        for i in $(seq 1 12); do
+        for i in $(seq 1 13); do
             run_module $i "Step $i" func
         done
         log_info "Setup completo!"
