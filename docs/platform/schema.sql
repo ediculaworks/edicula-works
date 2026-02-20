@@ -198,6 +198,54 @@ CREATE TABLE projetos (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Grupos de Tarefas (customizáveis)
+-- Deve ser criado ANTES de tarefas pois é referenciado
+CREATE TABLE grupos (
+    id SERIAL PRIMARY KEY,
+    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
+    
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    cor VARCHAR(7) DEFAULT '#6b7280',
+    icone VARCHAR(50),
+    
+    -- Configurações
+    ativo BOOLEAN DEFAULT true,
+    ordem INTEGER DEFAULT 0,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sprints
+-- Deve ser criado ANTES de tarefas pois é referenciado
+CREATE TABLE sprints (
+    id SERIAL PRIMARY KEY,
+    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
+    projeto_id INTEGER REFERENCES projetos(id) ON DELETE SET NULL,
+    
+    nome VARCHAR(100) NOT NULL,
+    objetivo TEXT,
+    
+    -- Datas
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    data_conclusao DATE,
+    
+    -- Status
+    status VARCHAR(20) DEFAULT 'planejada', -- planejada, ativa, concluida, cancelada
+    
+    -- Meta
+    meta_pontos INTEGER,
+    pontos_concluidos INTEGER DEFAULT 0,
+    
+    -- Configurações
+    ordem INTEGER DEFAULT 0,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tarefas (Kanban)
 CREATE TABLE tarefas (
     id SERIAL PRIMARY KEY,
@@ -267,52 +315,6 @@ CREATE TABLE tarefas (
     data_pausa TIMESTAMP WITH TIME ZONE,
     data_suspensao TIMESTAMP WITH TIME ZONE,
     data_abandono TIMESTAMP WITH TIME ZONE,
-    
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Grupos de Tarefas (customizáveis)
-CREATE TABLE grupos (
-    id SERIAL PRIMARY KEY,
-    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    cor VARCHAR(7) DEFAULT '#6b7280',
-    icone VARCHAR(50),
-    
-    -- Configurações
-    ativo BOOLEAN DEFAULT true,
-    ordem INTEGER DEFAULT 0,
-    
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Sprints
-CREATE TABLE sprints (
-    id SERIAL PRIMARY KEY,
-    empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    projeto_id INTEGER REFERENCES projetos(id) ON DELETE SET NULL,
-    
-    nome VARCHAR(100) NOT NULL,
-    objetivo TEXT,
-    
-    -- Datas
-    data_inicio DATE NOT NULL,
-    data_fim DATE NOT NULL,
-    data_conclusao DATE,
-    
-    -- Status
-    status VARCHAR(20) DEFAULT 'planejada', -- planejada, ativa, concluida, cancelada
-    
-    -- Meta
-    meta_pontos INTEGER,
-    pontos_concluidos INTEGER DEFAULT 0,
-    
-    -- Configurações
-    ordem INTEGER DEFAULT 0,
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
