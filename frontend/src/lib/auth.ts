@@ -6,6 +6,8 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
+    // Usar schema better_auth para tabelas do Better Auth
+    options: "-c search_path=better_auth,public",
   }),
   
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",

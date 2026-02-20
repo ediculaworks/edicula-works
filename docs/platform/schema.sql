@@ -78,7 +78,7 @@ CREATE TABLE usuarios (
     linguagem VARCHAR(10) DEFAULT 'pt-BR',
     
     -- Link com Better Auth
-    auth_user_id UUID REFERENCES auth.user(id) ON DELETE SET NULL,
+    auth_user_id UUID REFERENCES better_auth.user(id) ON DELETE SET NULL,
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -1388,14 +1388,14 @@ VALUES (1, 'contato@ediculaworks.com', 'suporte@ediculaworks.com', 'financeiro@e
 
 -- Usuários serão criados via Better Auth
 -- O trigger sync_auth_user_to_usuarios cria automaticamente na tabela usuarios
--- quando um usuário é criado em auth.user
+-- quando um usuário é criado em better_auth.user
 
 -- Para criar um admin inicial, use o seguinte SQL após configurar o Better Auth:
--- INSERT INTO auth.user (id, name, email, email_verified)
+-- INSERT INTO better_auth.user (id, name, email, email_verified)
 -- VALUES (gen_random_uuid(), 'Admin', 'admin@ediculaworks.com', true);
--- INSERT INTO auth.account (user_id, account_id, provider_id, password)
+-- INSERT INTO better_auth.account (user_id, account_id, provider_id, password)
 -- VALUES (
---   (SELECT id FROM auth.user WHERE email = 'admin@ediculaworks.com'),
+--   (SELECT id FROM better_auth.user WHERE email = 'admin@ediculaworks.com'),
 --   'admin@ediculaworks.com',
 --   'credential',
 --   '$2a$10$...' -- bcrypt hash da senha
@@ -1547,7 +1547,7 @@ $$ LANGUAGE plpgsql;
 -- TRIGGERS - Sincronização Better Auth
 -- ============================================================
 
--- Trigger para sincronizar auth.user -> usuarios (INSERT)
+-- Trigger para sincronizar better_auth.user -> usuarios (INSERT)
 CREATE OR REPLACE FUNCTION sync_auth_user_to_usuarios()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -1573,11 +1573,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER on_auth_user_created
-AFTER INSERT ON auth.user
+AFTER INSERT ON better_auth.user
 FOR EACH ROW
 EXECUTE FUNCTION sync_auth_user_to_usuarios();
 
--- Trigger para sincronizar auth.user -> usuarios (UPDATE)
+-- Trigger para sincronizar better_auth.user -> usuarios (UPDATE)
 CREATE OR REPLACE FUNCTION update_auth_user_sync()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -1594,7 +1594,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER on_auth_user_updated
-AFTER UPDATE ON auth.user
+AFTER UPDATE ON better_auth.user
 FOR EACH ROW
 EXECUTE FUNCTION update_auth_user_sync();
 
