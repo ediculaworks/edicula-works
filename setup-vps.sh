@@ -67,7 +67,7 @@ KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
 EOF
-sshd -t && systemctl restart sshd
+ssh -t && systemctl restart ssh
 
 # ======== 4. Firewall ========
 echo ""

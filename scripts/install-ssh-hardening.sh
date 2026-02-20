@@ -81,10 +81,10 @@ cat > /etc/ssh/banner <<'EOF'
 EOF
 
 echo "Verificando configuração SSH..."
-sshd -t
+ssh -t
 
 echo "Reiniciando SSH..."
-systemctl restart sshd
+systemctl restart ssh
 
 echo "Configurando Fail2Ban..."
 cat > /etc/fail2ban/jail.local <<'EOF'

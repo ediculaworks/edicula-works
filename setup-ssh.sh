@@ -72,7 +72,7 @@ echo "   ✓ Porta aberta"
 # Testar configuração
 echo ""
 echo "Testando configuração SSH..."
-if sshd -t; then
+if ssh -t; then
     echo "   ✓ Configuração válida"
 else
     echo "   ✗ Erro na configuração!"
@@ -97,7 +97,7 @@ read -p "Já testou? Confirma que funcionou? [s/n] " confirm
 if [ "$confirm" = "s" ] || [ "$confirm" = "S" ]; then
     echo ""
     echo "Reiniciando SSH..."
-    systemctl restart sshd
+    systemctl restart ssh
     echo ""
     echo "============================================"
     echo "  SSH CONFIGURADO!"
