@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, signUp } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,8 @@ import {
   Lock, 
   Github, 
   Chrome,
-  AlertCircle 
+  AlertCircle,
+  UserPlus
 } from "lucide-react";
 
 function LoginForm() {
@@ -21,11 +22,15 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   
+  const [isRegister, setIsRegister] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [errorDetail, setErrorDetail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   
   const parseError = (err: unknown): { message: string; detail: string } => {
@@ -130,6 +135,67 @@ function LoginForm() {
     }
   };
   
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setErrorDetail("");
+    setSuccess("");
+    setLoading(true);
+    
+    // Validação
+    if (!name || name.length < 2) {
+      setError("Por favor, insira seu nome.");
+      setLoading(false);
+      return;
+    }
+    if (!email || !email.includes("@")) {
+      setError("Por favor, insira um email válido.");
+      setLoading(false);
+      return;
+    }
+    if (!password || password.length < 8) {
+      setError("A senha deve ter pelo menos 8 caracteres.");
+      setLoading(false);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem.");
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      console.log("Tentando registrar:", email);
+      const result = await signUp.email({
+        email,
+        password,
+        name,
+      });
+      
+      if (result.error) {
+        console.log("Erro do Better Auth:", result.error);
+        const parsed = parseError(result.error);
+        setError(parsed.message);
+        setErrorDetail(parsed.detail);
+      } else {
+        console.log("Registro bem-sucedido!");
+        setSuccess("Conta criada com sucesso! Você já pode fazer login.");
+        setIsRegister(false);
+        setEmail("");
+        setPassword("");
+        setName("");
+        setConfirmPassword("");
+      }
+    } catch (err: unknown) {
+      console.error("Erro catch:", err);
+      const parsed = parseError(err);
+      setError(parsed.message);
+      setErrorDetail(parsed.detail);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const handleOAuthLogin = async (provider: "google" | "github") => {
     setError("");
     setOauthLoading(provider);
@@ -161,7 +227,7 @@ function LoginForm() {
         <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-700/50">
           <h2 className="text-xl font-semibold text-white mb-6">Entrar</h2>
           
-          {/* Erro */}
+          {/* Erro ou Sucesso */}
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
               <div className="flex items-center gap-2 text-red-400 text-sm font-medium">
@@ -181,8 +247,32 @@ function LoginForm() {
             </div>
           )}
           
+          {success && (
+            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm">
+              {success}
+            </div>
+          )}
+          
           {/* Formulário Email/Password */}
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          <form onSubmit={isRegister ? handleSignUp : handleEmailLogin} className="space-y-4">
+            {isRegister && (
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-gray-300">Nome</Label>
+                <div className="relative">
+                  <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Seu nome"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                    required={isRegister}
+                  />
+                </div>
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-300">Email</Label>
               <div className="relative">
@@ -200,20 +290,39 @@ function LoginForm() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">Senha</Label>
+              <Label htmlFor="password" className="text-gray-300">{isRegister ? "Senha" : "Senha"}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={isRegister ? "Mínimo 8 caracteres" : "••••••••"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
                   required
+                  minLength={isRegister ? 8 : undefined}
                 />
               </div>
             </div>
+            
+            {isRegister && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-gray-300">Confirmar Senha</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Repita a senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                    required={isRegister}
+                  />
+                </div>
+              </div>
+            )}
             
             <Button
               type="submit"
@@ -223,14 +332,41 @@ function LoginForm() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando...
+                  {isRegister ? "Criando conta..." : "Entrando..."}
                 </>
               ) : (
-                "Entrar"
+                isRegister ? "Criar Conta" : "Entrar"
               )}
             </Button>
           </form>
           
+          {/* Alternar entre Login e Registro */}
+          <div className="mt-4 text-center">
+            {isRegister ? (
+              <p className="text-gray-400 text-sm">
+                Já tem conta?{" "}
+                <button 
+                  type="button"
+                  onClick={() => { setIsRegister(false); setError(""); setSuccess(""); }}
+                  className="text-blue-400 hover:underline"
+                >
+                  Faça login
+                </button>
+              </p>
+            ) : (
+              <p className="text-gray-400 text-sm">
+                Não tem conta?{" "}
+                <button 
+                  type="button"
+                  onClick={() => { setIsRegister(true); setError(""); setSuccess(""); }}
+                  className="text-blue-400 hover:underline"
+                >
+                  Criar conta
+                </button>
+              </p>
+            )}
+          </div>
+
           {/* Separador - só mostrar se tiver OAuth configurado */}
           {(hasGoogleOAuth || hasGitHubOAuth) && (
             <div className="relative my-6">
