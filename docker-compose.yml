@@ -5,8 +5,7 @@ services:
       dockerfile: api/Dockerfile
     container_name: edicula-api
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8000:8000"
+    network_mode: host
     env_file:
       - ./api/.env
     environment:
@@ -18,8 +17,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - edicula-network
     security_opt:
       - no-new-privileges:true
 
@@ -35,7 +32,7 @@ services:
       - ./frontend/.env.local
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://api:8000/api
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       api:
         condition: service_healthy
@@ -80,15 +77,6 @@ services:
 networks:
   edicula-network:
     driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: br-edicula
-    ipam:
-      config:
-        - subnet: 172.28.0.0/16
-          gateway: 172.28.0.1
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
 
 volumes:
   nginx-cache:
