@@ -8,7 +8,7 @@ export const auth = betterAuth({
     ssl: { rejectUnauthorized: false },
   }),
   
-  baseURL: process.env.BETTER_AUTH_URL || "https://edicula.publicvm.com",
+  baseURL: process.env.BETTER_AUTH_URL || "https://edihub.work.gd",
   secret: process.env.BETTER_AUTH_SECRET,
   
   // Email/Password

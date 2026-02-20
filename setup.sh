@@ -4,8 +4,8 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 PROJECT_DIR="/opt/ediculaworks"
-DOMAIN="edicula.publicvm.com"
-EMAIL="admin@edicula.publicvm.com"
+DOMAIN="edihub.work.gd"
+EMAIL="admin@edihub.work.gd"
 USER="edicula"
 SSH_PORT=2222
 
