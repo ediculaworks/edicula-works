@@ -1,39 +1,22 @@
-from supabase import create_client, Client
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 from typing import Optional
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-class Database:
-    _instance: Optional[Client] = None
+engine = create_engine(DATABASE_URL or "sqlite:///./test.db")
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-    @classmethod
-    def get_client(cls) -> Client:
-        if cls._instance is None:
-            supabase_url = os.getenv("SUPABASE_URL")
-            supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
-
-            if not supabase_url or not supabase_key:
-                raise ValueError(
-                    "SUPABASE_URL and SUPABASE_SERVICE_KEY must be set"
-                )
-
-            cls._instance = create_client(
-                supabase_url,
-                supabase_key,
-            )
-
-        return cls._instance
-
-    @classmethod
-    def reset(cls):
-        cls._instance = None
+Base = declarative_base()
 
 
-db = Database.get_client()
-
-
-def get_db() -> Client:
-    return db
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

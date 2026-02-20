@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
 
-from api.routes import tarefas, contratos, transacoes, search, health, grupos, sprints, me, usuarios, tags
+from api.routes import health
+from api.database import engine, Base
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting EdiculaWorks API...")
+    Base.metadata.create_all(bind=engine)
     yield
     print("Shutting down EdiculaWorks API...")
 
@@ -22,22 +24,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:18789"],
+    allow_origins=["http://localhost:3000", "http://localhost:18789", "https://edicula.publicvm.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(health.router, prefix="/api", tags=["Health"])
-app.include_router(me.router, prefix="/api", tags=["User"])
-app.include_router(usuarios.router, prefix="/api/usuarios", tags=["Usuários"])
-app.include_router(tarefas.router, prefix="/api/tarefas", tags=["Tarefas"])
-app.include_router(grupos.router, prefix="/api/grupos", tags=["Grupos"])
-app.include_router(sprints.router, prefix="/api/sprints", tags=["Sprints"])
-app.include_router(tags.router, prefix="/api/tags", tags=["Tags"])
-app.include_router(contratos.router, prefix="/api/contratos", tags=["Contratos"])
-app.include_router(transacoes.router, prefix="/api/transacoes", tags=["Transações"])
-app.include_router(search.router, prefix="/api/search", tags=["Busca"])
 
 
 @app.get("/")
@@ -47,6 +40,11 @@ async def root():
         "version": "1.0.0",
         "status": "running"
     }
+
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy"}
 
 
 if __name__ == "__main__":
