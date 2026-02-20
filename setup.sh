@@ -132,7 +132,7 @@ ENVEOF
                 cat > "$PROJECT_DIR/frontend/.env.local" << ENVEOF
 BETTER_AUTH_SECRET=$AUTH_SECRET
 BETTER_AUTH_URL=https://$DOMAIN
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_API_URL=https://$DOMAIN/api
 NEXT_PUBLIC_BETTER_AUTH_URL=https://$DOMAIN
 ENVEOF
                 chmod 600 "$PROJECT_DIR/api/.env" "$PROJECT_DIR/frontend/.env.local"
