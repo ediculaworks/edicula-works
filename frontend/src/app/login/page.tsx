@@ -24,12 +24,71 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errorDetail, setErrorDetail] = useState("");
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  
+  const parseError = (err: unknown): { message: string; detail: string } => {
+    const errorStr = err instanceof Error ? err.message : String(err);
+    const errorCode = err && typeof err === 'object' && 'code' in err ? (err as { code?: string }).code : '';
+    const errorResponse = err && typeof err === 'object' && 'response' in err ? (err as { response?: { data?: { message?: string } } }).response?.data : null;
+    
+    console.log("DEBUG - Erro completo:", err);
+    console.log("DEBUG - Error str:", errorStr);
+    console.log("DEBUG - Error code:", errorCode);
+    console.log("DEBUG - Error response:", errorResponse);
+    
+    // Erros de banco de dados
+    if (errorStr.includes("relation") || errorStr.includes("table") || errorStr.includes("database") || errorStr.includes("42P01") || errorStr.includes("42P02")) {
+      return { 
+        message: "Erro: Tabelas do banco de dados não existem.", 
+        detail: `DB Error: ${errorStr.substring(0, 200)}` 
+      };
+    }
+    
+    // Erros de credenciais
+    if (errorStr.includes("user not found") || errorStr.includes("invalid credentials") || errorStr.includes("incorrect") || errorStr.includes("password")) {
+      return { 
+        message: "Email ou senha incorretos.", 
+        detail: `Credenciais inválidas para: ${email}` 
+      };
+    }
+    
+    // Erros de rede
+    if (errorStr.includes("network") || errorStr.includes("fetch") || errorStr.includes("ECONNREFUSED") || errorStr.includes("ENOTFOUND")) {
+      return { 
+        message: "Erro de conexão. Verifique sua internet.", 
+        detail: `Network Error: ${errorStr.substring(0, 200)}` 
+      };
+    }
+    
+    // Erros de servidor
+    if (errorStr.includes("500") || errorStr.includes("502") || errorStr.includes("503") || errorStr.includes("server error")) {
+      return { 
+        message: "Erro no servidor. Tente novamente mais tarde.", 
+        detail: `Server Error: ${errorStr.substring(0, 200)}` 
+      };
+    }
+    
+    // Erros de autorização
+    if (errorStr.includes("unauthorized") || errorStr.includes("403") || errorStr.includes("forbidden")) {
+      return { 
+        message: "Acesso não autorizado.", 
+        detail: `Auth Error: ${errorStr.substring(0, 200)}` 
+      };
+    }
+    
+    // Erro genérico
+    return { 
+      message: "Erro ao fazer login. Tente novamente.", 
+      detail: `Error: ${errorStr.substring(0, 300)}` 
+    };
+  };
   
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrorDetail("");
     setLoading(true);
     
     // Validação básica
@@ -45,38 +104,27 @@ function LoginForm() {
     }
     
     try {
+      console.log("Tentando login com:", email);
       const result = await signIn.email({
         email,
         password,
       });
       
       if (result.error) {
-        // Traduzir erros comuns do Better Auth
-        const errorMessage = result.error.message;
-        if (errorMessage.includes("user not found") || errorMessage.includes("invalid credentials")) {
-          setError("Email ou senha incorretos. Tente novamente.");
-        } else if (errorMessage.includes("email not verified")) {
-          setError("Por favor, verifique seu email para confirmar a conta.");
-        } else if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
-          setError("Erro de conexão. Verifique sua internet e tente novamente.");
-        } else {
-          setError(result.error.message || "Erro ao fazer login. Tente novamente.");
-        }
-        console.error("Erro de login:", result.error);
+        console.log("Erro do Better Auth:", result.error);
+        const parsed = parseError(result.error);
+        setError(parsed.message);
+        setErrorDetail(parsed.detail);
       } else {
+        console.log("Login bem-sucedido!");
         router.push(callbackUrl);
         router.refresh();
       }
     } catch (err: unknown) {
-      console.error("Erro completo:", err);
-      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
-      if (errorMsg.includes("relation") || errorMsg.includes("table") || errorMsg.includes("database")) {
-        setError("Erro no banco de dados. Entre em contato com o administrador.");
-      } else if (errorMsg.includes("network") || errorMsg.includes("fetch")) {
-        setError("Erro de conexão. Verifique sua internet.");
-      } else {
-        setError("Erro ao fazer login. Tente novamente.");
-      }
+      console.error("Erro catch:", err);
+      const parsed = parseError(err);
+      setError(parsed.message);
+      setErrorDetail(parsed.detail);
     } finally {
       setLoading(false);
     }
@@ -115,9 +163,21 @@ function LoginForm() {
           
           {/* Erro */}
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{error}</span>
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
+              <div className="flex items-center gap-2 text-red-400 text-sm font-medium">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+              {errorDetail && (
+                <details className="mt-2">
+                  <summary className="text-red-300 text-xs cursor-pointer hover:text-red-200">
+                    Ver detalhes técnicos
+                  </summary>
+                  <pre className="mt-2 p-2 bg-red-900/30 rounded text-xs text-red-300 overflow-x-auto whitespace-pre-wrap">
+                    {errorDetail}
+                  </pre>
+                </details>
+              )}
             </div>
           )}
           
