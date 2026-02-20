@@ -7,7 +7,6 @@ PROJECT_DIR="/opt/ediculaworks"
 DOMAIN="edihub.work.gd"
 EMAIL="admin@edihub.work.gd"
 USER="edicula"
-SSH_PORT=2222
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -68,24 +67,26 @@ run_module() {
                 usermod -aG docker "$USER" 2>/dev/null || true
             fi
             ;;
-        3)  mkdir -p /etc/ssh/sshd_config.d
-            cat > /etc/ssh/sshd_config.d/99-hardening.conf << 'EOF'
-Port 2222
-PermitRootLogin no
-PubkeyAuthentication yes
-PasswordAuthentication no
-ClientAliveInterval 300
-MaxAuthTries 3
-X11Forwarding no
-AllowTcpForwarding no
-LogLevel VERBOSE
-EOF
-            ssh -t && systemctl restart ssh
+        3)  log_info "SSH - mantendo configuração padrão (porta 22)"
+            # Hardening desabilitado para evitar problemas de conexão
+            # mkdir -p /etc/ssh/sshd_config.d
+            # cat > /etc/ssh/sshd_config.d/99-hardening.conf << 'EOF'
+            # Port 2222
+            # PermitRootLogin no
+            # PubkeyAuthentication yes
+            # PasswordAuthentication no
+            # ClientAliveInterval 300
+            # MaxAuthTries 3
+            # X11Forwarding no
+            # AllowTcpForwarding no
+            # LogLevel VERBOSE
+            # EOF
+            # systemctl restart ssh
             ;;
         4)  ufw --force reset
             ufw default deny incoming
             ufw default allow outgoing
-            ufw limit $SSH_PORT/tcp comment 'SSH'
+            ufw limit 22/tcp comment 'SSH'
             ufw allow 80/tcp && ufw allow 443/tcp
             ufw --force enable
             ;;
