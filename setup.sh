@@ -147,60 +147,68 @@ ENVEOF
             DB_URL=$(grep DATABASE_URL "$PROJECT_DIR/api/.env" | cut -d'=' -f2-)
             
             log_info "Criando schema Better Auth..."
-            PGPASSWORD=$(echo "$DB_URL" | grep -oP '(?<=:)[^@]+(?=@)') psql "$DB_URL" -c "
+            
+            # Extrair senha do DATABASE_URL
+            DB_HOST=$(echo "$DB_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
+            DB_PORT=$(echo "$DB_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+            DB_NAME=$(echo "$DB_URL" | sed -n 's|.*/\([^?]*\).*|\1|p')
+            DB_USER=$(echo "$DB_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
+            DB_PASS=$(echo "$DB_URL" | sed -n 's|.*://\([^:]*\)@.*|\1|p' | head -1)
+            
+            PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "
                 CREATE TABLE IF NOT EXISTS public.\"user\" (
-                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                    name VARCHAR(255),
-                    email VARCHAR(255) UNIQUE NOT NULL,
+                    id TEXT PRIMARY KEY,
+                    name TEXT,
+                    email TEXT UNIQUE NOT NULL,
                     email_verified BOOLEAN DEFAULT false,
-                    image VARCHAR(500),
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    image TEXT,
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
                 );
                 
                 CREATE TABLE IF NOT EXISTS public.session (
-                    id VARCHAR(255) PRIMARY KEY,
-                    user_id UUID NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
-                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                    token VARCHAR(255),
-                    ip_address VARCHAR(45),
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
+                    expires_at TIMESTAMPTZ NOT NULL,
+                    token TEXT,
+                    ip_address TEXT,
                     user_agent TEXT,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
                 );
                 
                 CREATE TABLE IF NOT EXISTS public.account (
-                    id VARCHAR(255) PRIMARY KEY,
-                    user_id UUID NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
-                    account_id VARCHAR(255),
-                    provider_id VARCHAR(255),
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
+                    account_id TEXT,
+                    provider_id TEXT,
                     access_token TEXT,
                     refresh_token TEXT,
-                    access_token_expires_at TIMESTAMP WITH TIME ZONE,
-                    refresh_token_expires_at TIMESTAMP WITH TIME ZONE,
+                    access_token_expires_at TIMESTAMPTZ,
+                    refresh_token_expires_at TIMESTAMPTZ,
                     scope TEXT,
                     id_token TEXT,
-                    password VARCHAR(255),
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    password TEXT,
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
                 );
                 
                 CREATE TABLE IF NOT EXISTS public.verification (
-                    id VARCHAR(255) PRIMARY KEY,
-                    identifier VARCHAR(255) NOT NULL,
-                    value VARCHAR(255) NOT NULL,
-                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    id TEXT PRIMARY KEY,
+                    identifier TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    expires_at TIMESTAMPTZ NOT NULL,
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
                 );
                 
                 CREATE INDEX IF NOT EXISTS idx_user_email ON public.\"user\"(email);
                 CREATE INDEX IF NOT EXISTS idx_session_user_id ON public.session(user_id);
+                CREATE INDEX IF NOT EXISTS idx_session_expires_at ON public.session(expires_at);
                 CREATE INDEX IF NOT EXISTS idx_account_user_id ON public.account(user_id);
-            " || log_warn "Schema pode já existir"
+                CREATE INDEX IF NOT EXISTS idx_verification_identifier ON public.verification(identifier);
+            " 2>&1 || log_warn "Schema pode já existir"
             
-            log_info "Criando usuário admin..."
-            psql "$DB_URL" -c "INSERT INTO public.\"user\" (name, email, email_verified) VALUES ('Admin', 'admin@ediculaworks.com', true) ON CONFLICT (email) DO NOTHING;" || true
             log_info "Schema Better Auth configurado ✓"
             ;;
         9)  mkdir -p /etc/openclaw

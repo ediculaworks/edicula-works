@@ -32,6 +32,18 @@ function LoginForm() {
     setError("");
     setLoading(true);
     
+    // Validação básica
+    if (!email || !email.includes("@")) {
+      setError("Por favor, insira um email válido.");
+      setLoading(false);
+      return;
+    }
+    if (!password || password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres.");
+      setLoading(false);
+      return;
+    }
+    
     try {
       const result = await signIn.email({
         email,
@@ -39,13 +51,32 @@ function LoginForm() {
       });
       
       if (result.error) {
-        setError(result.error.message || "Erro ao fazer login");
+        // Traduzir erros comuns do Better Auth
+        const errorMessage = result.error.message;
+        if (errorMessage.includes("user not found") || errorMessage.includes("invalid credentials")) {
+          setError("Email ou senha incorretos. Tente novamente.");
+        } else if (errorMessage.includes("email not verified")) {
+          setError("Por favor, verifique seu email para confirmar a conta.");
+        } else if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+          setError("Erro de conexão. Verifique sua internet e tente novamente.");
+        } else {
+          setError(result.error.message || "Erro ao fazer login. Tente novamente.");
+        }
+        console.error("Erro de login:", result.error);
       } else {
         router.push(callbackUrl);
         router.refresh();
       }
-    } catch (err) {
-      setError("Erro ao fazer login. Tente novamente.");
+    } catch (err: unknown) {
+      console.error("Erro completo:", err);
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido";
+      if (errorMsg.includes("relation") || errorMsg.includes("table") || errorMsg.includes("database")) {
+        setError("Erro no banco de dados. Entre em contato com o administrador.");
+      } else if (errorMsg.includes("network") || errorMsg.includes("fetch")) {
+        setError("Erro de conexão. Verifique sua internet.");
+      } else {
+        setError("Erro ao fazer login. Tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
