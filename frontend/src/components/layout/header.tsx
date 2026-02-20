@@ -45,10 +45,6 @@ export function Header() {
         </Button>
 
         <ThemeToggle />
-
-        <div className="ml-2 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)]" />
-        </div>
       </div>
     </header>
   )
