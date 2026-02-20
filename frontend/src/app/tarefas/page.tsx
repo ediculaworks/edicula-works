@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { Tarefa, Prioridade, StatusTarefa, ColunaKanban } from "@/types"
+import type { Tarefa, Prioridade, StatusTarefa, ColunaKanban, Usuario, Grupo, Sprint, Tag as TagType } from "@/types"
 import {
   Plus,
   Search,
@@ -27,8 +27,11 @@ import {
   Play,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { mockUsuarios, mockGrupos, mockSprints, mockTags } from "@/lib/mock-data"
 import { useTarefas } from "@/hooks/useTarefas"
+import { useUsuarios } from "@/hooks/useUsuarios"
+import { useTags } from "@/hooks/useTags"
+import { useGrupos } from "@/hooks/useGrupos"
+import { useSprints } from "@/hooks/useSprints"
 
 const EMPRESA_ID = 1
 
@@ -47,15 +50,6 @@ const statusTarefas: { id: StatusTarefa; cor: string; label: string }[] = [
   { id: "concluida", cor: "#6b7280", label: "Concluída" },
 ]
 
-const availableTags = [
-  { id: "frontend", cor: "#3b82f6", label: "frontend" },
-  { id: "backend", cor: "#8b5cf6", label: "backend" },
-  { id: "infra", cor: "#10b981", label: "infra" },
-  { id: "ia", cor: "#f59e0b", label: "ia" },
-  { id: "qa", cor: "#ef4444", label: "qa" },
-  { id: "docs", cor: "#06b6d4", label: "docs" },
-]
-
 const ITEMS_PER_PAGE = 15
 
 function getPrioridadeConfig(p: Prioridade) {
@@ -64,10 +58,6 @@ function getPrioridadeConfig(p: Prioridade) {
 
 function getStatusConfig(s: StatusTarefa) {
   return statusTarefas.find((st) => st.id === s) || statusTarefas[0]
-}
-
-function getTagConfig(tagId: string) {
-  return availableTags.find((t) => t.id === tagId) || { id: tagId, cor: "#6b7280", label: tagId }
 }
 
 const colunas: { id: ColunaKanban; titulo: string; cor: string }[] = [
@@ -82,22 +72,6 @@ interface Filtros {
   prioridade?: Prioridade
   status?: StatusTarefa
 }
-
-// Dados de exemplo
-const tarefasExemplo: Tarefa[] = [
-  { id: 1, empresa_id: 1, titulo: "Setup inicial do projeto", descricao: "Configurar estrutura base", coluna: "done", prioridade: "alta", responsaveis: [1], tags: ["infra"], created_at: "2026-02-15T10:00:00Z", updated_at: "2026-02-18T15:00:00Z", tempo_gasto_minutos: 120, ordem: 0, eh_subtarefa: false, status: "concluida", observadores: [], previsao_entrega: "2026-02-18", estimativa_horas_prevista: 8 },
-  { id: 2, empresa_id: 1, titulo: "Criar schema do banco", descricao: "Schema completo", coluna: "done", prioridade: "alta", responsaveis: [1], tags: ["backend"], created_at: "2026-02-16T10:00:00Z", updated_at: "2026-02-17T15:00:00Z", tempo_gasto_minutos: 180, ordem: 1, eh_subtarefa: false, status: "concluida", observadores: [], previsao_entrega: "2026-02-17", estimativa_horas_prevista: 12 },
-  { id: 3, empresa_id: 1, titulo: "Implementar API FastAPI", descricao: "Endpoints REST", coluna: "in_progress", prioridade: "alta", responsaveis: [2], prazo: "2026-02-25", tags: ["backend"], created_at: "2026-02-17T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 60, ordem: 0, eh_subtarefa: false, status: "ativa", observadores: [], previsao_entrega: "2026-02-25", estimativa_horas_prevista: 16 },
-  { id: 4, empresa_id: 1, titulo: "Configurar agentes IA", descricao: "OpenClaw", coluna: "todo", prioridade: "media", responsaveis: [3], tags: ["ia"], created_at: "2026-02-18T10:00:00Z", updated_at: "2026-02-18T10:00:00Z", tempo_gasto_minutos: 0, ordem: 0, eh_subtarefa: false, status: "ativa", observadores: [], previsao_entrega: "2026-02-28", estimativa_horas_prevista: 8 },
-  { id: 5, empresa_id: 1, titulo: "Criar interface Kanban", descricao: "Frontend Next.js", coluna: "todo", prioridade: "media", responsaveis: [4], tags: ["frontend"], created_at: "2026-02-18T10:00:00Z", updated_at: "2026-02-18T10:00:00Z", tempo_gasto_minutos: 0, ordem: 1, eh_subtarefa: false, status: "ativa", observadores: [] },
-  { id: 6, empresa_id: 1, titulo: "Implementar busca semântica", descricao: "pgVector", coluna: "todo", prioridade: "baixa", responsaveis: [1], tags: ["backend", "ia"], created_at: "2026-02-18T10:00:00Z", updated_at: "2026-02-18T10:00:00Z", tempo_gasto_minutos: 0, ordem: 2, eh_subtarefa: false, status: "pausada", observadores: [], motivo_pausa: "Aguardando definição de requisitos" },
-  { id: 7, empresa_id: 1, titulo: "Revisar código", coluna: "review", prioridade: "alta", responsaveis: [1], tags: ["qa"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 0, ordem: 0, eh_subtarefa: false, status: "ativa", observadores: [] },
-  { id: 8, empresa_id: 1, titulo: "Criar documentação", coluna: "todo", prioridade: "baixa", responsaveis: [1], tags: ["docs"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 0, ordem: 3, eh_subtarefa: false, status: "ativa", observadores: [] },
-  { id: 9, empresa_id: 1, titulo: "Configurar CI/CD", coluna: "todo", prioridade: "alta", responsaveis: [2], tags: ["infra"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 0, ordem: 4, eh_subtarefa: false, status: "ativa", observadores: [] },
-  { id: 10, empresa_id: 1, titulo: "Testes unitários", coluna: "in_progress", prioridade: "media", responsaveis: [3], tags: ["qa", "backend"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 30, ordem: 1, eh_subtarefa: false, status: "ativa", observadores: [] },
-  { id: 11, empresa_id: 1, titulo: "Atualizar dependências", coluna: "done", prioridade: "baixa", responsaveis: [1], tags: ["frontend", "backend"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 15, ordem: 2, eh_subtarefa: false, status: "concluida", observadores: [] },
-  { id: 12, empresa_id: 1, titulo: "Setup banco de dados", coluna: "done", prioridade: "alta", responsaveis: [2], tags: ["infra", "backend"], created_at: "2026-02-15T10:00:00Z", updated_at: "2026-02-16T10:00:00Z", tempo_gasto_minutos: 240, ordem: 3, eh_subtarefa: false, status: "concluida", observadores: [] },
-]
 
 interface ContextMenuProps {
   x: number
@@ -234,6 +208,11 @@ function ContextMenu({ x, y, tarefa, onClose, onEdit, onDelete, onMove, onExport
 
 export default function TarefasPage() {
   const { tarefas: apiTarefas, loading, error, refetch, createTarefa, updateTarefa, deleteTarefa, iniciarTarefa, pausarTarefa, finalizarTarefa, abandonarTarefa } = useTarefas({ empresaId: EMPRESA_ID })
+  const { usuarios, getUsuarioById } = useUsuarios({ empresaId: EMPRESA_ID })
+  const { tags, getTagById } = useTags({ empresaId: EMPRESA_ID })
+  const { grupos, getGrupoById } = useGrupos({ empresaId: EMPRESA_ID })
+  const { sprints } = useSprints({ empresaId: EMPRESA_ID })
+  
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [isApiConnected, setIsApiConnected] = useState(false)
   const [filtros, setFiltros] = useState<Filtros>({})
@@ -250,7 +229,7 @@ export default function TarefasPage() {
         setTarefas(apiTarefas)
         setIsApiConnected(true)
       } else {
-        setTarefas(tarefasExemplo)
+        setTarefas([])
         setIsApiConnected(false)
       }
     }
@@ -487,7 +466,7 @@ export default function TarefasPage() {
                         </span>
 
                         {tarefa.tags.map((tag) => {
-                          const tagConfig = getTagConfig(tag)
+                          const tagConfig = tags.find(t => t.nome === tag) || { nome: tag, cor: "#6b7280" }
                           return (
                             <span
                               key={tag}
@@ -495,7 +474,7 @@ export default function TarefasPage() {
                               style={{ backgroundColor: `${tagConfig.cor}20`, color: tagConfig.cor }}
                             >
                               <Tag className="h-2.5 w-2.5" />
-                              {tagConfig.label}
+                              {tagConfig.nome}
                             </span>
                           )
                         })}
@@ -624,6 +603,10 @@ export default function TarefasPage() {
             }}
             isCreating={isCreating}
             editMode={openInEditMode}
+            usuarios={usuarios}
+            grupos={grupos}
+            sprints={sprints}
+            tags={tags}
           />
         )}
       </AnimatePresence>
@@ -665,9 +648,13 @@ interface TarefaModalProps {
   onSave: (tarefa: Tarefa) => void
   isCreating?: boolean
   editMode?: boolean
+  usuarios: Usuario[]
+  grupos: Grupo[]
+  sprints: Sprint[]
+  tags: TagType[]
 }
 
-function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = false }: TarefaModalProps) {
+function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = false, usuarios, grupos, sprints, tags }: TarefaModalProps) {
   const [editModeState, setEditModeState] = useState(!isCreating && editMode)
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
@@ -694,9 +681,9 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
 
   const prioridade = getPrioridadeConfig(formData.prioridade)
   const status = getStatusConfig(formData.status)
-  const responsaveis = formData.responsaveis.map(id => mockUsuarios.find(u => u.id === id)).filter(Boolean)
-  const grupo = formData.grupo_id ? mockGrupos.find(g => g.id === formData.grupo_id) : null
-  const sprint = formData.sprint_id ? mockSprints.find(s => s.id === formData.sprint_id) : null
+  const responsaveis = formData.responsaveis.map(id => usuarios.find(u => u.id === id)).filter(Boolean)
+  const grupo = formData.grupo_id ? grupos.find(g => g.id === formData.grupo_id) : null
+  const sprint = formData.sprint_id ? sprints.find(s => s.id === formData.sprint_id) : null
 
   const handleSave = () => {
     onSave({
@@ -821,14 +808,14 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
                 <select
                   multiple
-                  value={formData.responsaveis.map(String)}
+                  value={formData.responsaveis}
                   onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => Number(option.value))
+                    const values = Array.from(e.target.selectedOptions, option => option.value)
                     setFormData(prev => ({ ...prev, responsaveis: values }))
                   }}
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm h-24"
                 >
-                  {mockUsuarios.map(u => (
+                  {usuarios.map(u => (
                     <option key={u.id} value={u.id}>{u.nome}</option>
                   ))}
                 </select>
@@ -841,7 +828,7 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm"
                 >
                   <option value="">Selecione...</option>
-                  {mockGrupos.map(g => (
+                  {grupos.map(g => (
                     <option key={g.id} value={g.id}>{g.nome}</option>
                   ))}
                 </select>
@@ -857,7 +844,7 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm"
                 >
                   <option value="">Selecione...</option>
-                  {mockSprints.map(s => (
+                  {sprints.map(s => (
                     <option key={s.id} value={s.id}>{s.nome}</option>
                   ))}
                 </select>
@@ -885,19 +872,19 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
             <div>
               <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Tags</label>
               <div className="flex flex-wrap gap-2">
-                {mockTags.map(tag => (
+                {tags.map(tag => (
                   <button
                     key={tag.id}
                     type="button"
                     onClick={() => {
-                      const newTags = formData.tags.includes(tag.id)
-                        ? formData.tags.filter(t => t !== tag.id)
-                        : [...formData.tags, tag.id]
+                      const newTags = formData.tags.includes(tag.nome)
+                        ? formData.tags.filter(t => t !== tag.nome)
+                        : [...formData.tags, tag.nome]
                       setFormData(prev => ({ ...prev, tags: newTags }))
                     }}
                     className={cn(
                       "rounded-full px-3 py-1 text-sm flex items-center gap-1 transition-colors",
-                      formData.tags.includes(tag.id)
+                      formData.tags.includes(tag.nome)
                         ? "ring-2 ring-offset-1"
                         : "opacity-50 hover:opacity-100"
                     )}
@@ -908,7 +895,7 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
                     }}
                   >
                     <Tag className="h-3.5 w-3.5" />
-                    {tag.label}
+                    {tag.nome}
                   </button>
                 ))}
               </div>
@@ -927,7 +914,7 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag) => {
-                    const tagConfig = getTagConfig(tag)
+                    const tagConfig = tags.find(t => t.nome === tag) || { nome: tag, cor: "#6b7280" }
                     return (
                       <span
                         key={tag}
@@ -935,7 +922,7 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
                         style={{ backgroundColor: `${tagConfig.cor}20`, color: tagConfig.cor }}
                       >
                         <Tag className="h-3.5 w-3.5" />
-                        {tagConfig.label}
+                        {tagConfig.nome}
                       </span>
                     )
                   })}

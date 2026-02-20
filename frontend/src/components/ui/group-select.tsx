@@ -2,20 +2,20 @@
 
 import { useState } from "react"
 import { ChevronDown, Check, Folder } from "lucide-react"
-import { mockGrupos, getGrupoById } from "@/lib/mock-data"
 import type { Grupo } from "@/types"
 import { cn } from "@/lib/utils"
 
 interface GroupSelectProps {
   value: number | null
   onChange: (groupId: number | null) => void
+  grupos?: Grupo[]
   placeholder?: string
   className?: string
 }
 
-export function GroupSelect({ value, onChange, placeholder = "Selecionar...", className }: GroupSelectProps) {
+export function GroupSelect({ value, onChange, grupos = [], placeholder = "Selecionar...", className }: GroupSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const selectedGroup = value ? getGrupoById(value) : null
+  const selectedGroup = value ? grupos.find(g => g.id === value) : null
 
   return (
     <div className={cn("relative", className)}>
@@ -44,7 +44,7 @@ export function GroupSelect({ value, onChange, placeholder = "Selecionar...", cl
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute z-50 mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] py-1 shadow-xl">
-            {mockGrupos.map((group) => (
+            {grupos.map((group) => (
               <button
                 key={group.id}
                 type="button"

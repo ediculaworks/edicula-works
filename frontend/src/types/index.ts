@@ -24,13 +24,24 @@ export type Agente = 'chief' | 'tech' | 'gestao' | 'financeiro' | 'security' | '
 
 // Interfaces base
 export interface Usuario {
-  id: number
+  id: string  // UUID
+  empresa_id?: number
+  auth_user_id?: string  // UUID do Better Auth
   nome: string
   email: string
+  username?: string
   avatar_url?: string
   cargo?: string
+  departamento?: string
   role: 'admin' | 'manager' | 'member'
+  perfil_id?: number
   ativo: boolean
+  email_verificado: boolean
+  ultimo_login?: string
+  tema?: string
+  linguagem?: string
+  created_at: string
+  updated_at: string
 }
 
 export interface Tarefa {
@@ -46,8 +57,8 @@ export interface Tarefa {
   prazo?: string
   data_conclusao?: string
   tempo_gasto_minutos: number
-  responsaveis: number[]
-  created_by?: number
+  responsaveis: string[]  // UUID[]
+  created_by?: string     // UUID
   cliente_nome?: string
   tarefa_pai_id?: number
   eh_subtarefa: boolean
@@ -58,7 +69,7 @@ export interface Tarefa {
   status: StatusTarefa
   sprint_id?: number
   grupo_id?: number
-  observadores: number[]
+  observadores: string[]  // UUID[]
   previsao_entrega?: string
   estimativa_horas_prevista?: number
   data_inicio?: string
@@ -178,6 +189,17 @@ export interface Sprint {
   meta_pontos?: number
   pontos_concluidos: number
   ordem: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Tag {
+  id: number
+  empresa_id: number
+  nome: string
+  cor?: string
+  icone?: string
+  escopo: string
   created_at: string
   updated_at: string
 }

@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTarefas } from "@/hooks/useTarefas"
-import { mockUsuarios } from "@/lib/mock-data"
+import { useUsuarios } from "@/hooks/useUsuarios"
 
 const EMPRESA_ID = 1
 
@@ -100,6 +100,7 @@ function getPriorityStyle(priority: string) {
 
 export default function DashboardPage() {
   const { tarefas: apiTarefas, loading } = useTarefas({ empresaId: EMPRESA_ID })
+  const { usuarios, getUsuarioById } = useUsuarios({ empresaId: EMPRESA_ID })
 
   const tarefasAtivas = apiTarefas.filter(t => t.status === "ativa").length
   const tarefasConcluidas = apiTarefas.filter(t => t.status === "concluida").length
@@ -109,9 +110,9 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 5)
 
-  function getUsuarioNome(id: number) {
-    const usuario = mockUsuarios.find(u => u.id === id)
-    return usuario?.nome || `User ${id}`
+  function getUsuarioNome(id: string) {
+    const usuario = getUsuarioById(id)
+    return usuario?.nome || `User ${id?.substring(0, 8) || 'Unknown'}`
   }
 
   const stats = [

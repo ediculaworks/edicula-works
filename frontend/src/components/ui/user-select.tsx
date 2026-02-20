@@ -2,20 +2,20 @@
 
 import { useState } from "react"
 import { ChevronDown, Check, User } from "lucide-react"
-import { mockUsuarios, getUsuarioById } from "@/lib/mock-data"
 import type { Usuario } from "@/types"
 import { cn } from "@/lib/utils"
 
 interface UserSelectProps {
-  value: number | null
-  onChange: (userId: number | null) => void
+  value: string | null
+  onChange: (userId: string | null) => void
+  usuarios?: Usuario[]
   placeholder?: string
   className?: string
 }
 
-export function UserSelect({ value, onChange, placeholder = "Selecionar...", className }: UserSelectProps) {
+export function UserSelect({ value, onChange, usuarios = [], placeholder = "Selecionar...", className }: UserSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const selectedUser = value ? getUsuarioById(value) : null
+  const selectedUser = value ? usuarios.find(u => u.id === value) : null
 
   return (
     <div className={cn("relative", className)}>
@@ -43,7 +43,7 @@ export function UserSelect({ value, onChange, placeholder = "Selecionar...", cla
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute z-50 mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] py-1 shadow-xl">
-            {mockUsuarios.map((user) => (
+            {usuarios.map((user) => (
               <button
                 key={user.id}
                 type="button"

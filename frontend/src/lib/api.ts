@@ -239,6 +239,55 @@ export const api = {
     return handleResponse<Contrato[]>(response)
   },
 
+  // Usuarios
+  async getUsuarios(params?: {
+    empresa_id?: number
+    ativo?: boolean
+    role?: string
+  }) {
+    const searchParams = new URLSearchParams()
+    if (params?.empresa_id) searchParams.set('empresa_id', params.empresa_id.toString())
+    if (params?.ativo !== undefined) searchParams.set('ativo', params.ativo.toString())
+    if (params?.role) searchParams.set('role', params.role)
+    
+    const url = `${API_BASE}/usuarios${searchParams.toString() ? '?' + searchParams : ''}`
+    const response = await fetch(url)
+    return handleResponse<Usuario[]>(response)
+  },
+
+  async getUsuario(id: string) {
+    const response = await fetch(`${API_BASE}/usuarios/${id}`)
+    return handleResponse<Usuario>(response)
+  },
+
+  async getUsuarioByEmail(email: string) {
+    const response = await fetch(`${API_BASE}/usuarios/email/${encodeURIComponent(email)}`)
+    return handleResponse<Usuario>(response)
+  },
+
+  // Tags
+  async getTags(params?: {
+    empresa_id?: number
+    escopo?: string
+  }) {
+    const searchParams = new URLSearchParams()
+    if (params?.empresa_id) searchParams.set('empresa_id', params.empresa_id.toString())
+    if (params?.escopo) searchParams.set('escopo', params.escopo)
+    
+    const url = `${API_BASE}/tags${searchParams.toString() ? '?' + searchParams : ''}`
+    const response = await fetch(url)
+    return handleResponse<Tag[]>(response)
+  },
+
+  async createTag(data: { nome: string; cor?: string; icone?: string; escopo?: string }) {
+    const response = await fetch(`${API_BASE}/tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Tag>(response)
+  },
+
   // Projetos
   async getProjetos(empresaId: number = 1) {
     const response = await fetch(`${API_BASE}/projetos?empresa_id=${empresaId}`)
@@ -291,6 +340,6 @@ export const api = {
 }
 
 // Types inline (importados do types/index)
-import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, ColunaKanban } from '@/types'
+import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, ColunaKanban, Usuario, Tag } from '@/types'
 
-export type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint }
+export type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, Usuario, Tag }

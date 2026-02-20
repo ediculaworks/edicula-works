@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
 
-from api.routes import tarefas, contratos, transacoes, search, health, grupos, sprints, me
+from api.routes import tarefas, contratos, transacoes, search, health, grupos, sprints, me, usuarios, tags
 
 
 @asynccontextmanager
@@ -30,12 +30,14 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api", tags=["Health"])
 app.include_router(me.router, prefix="/api", tags=["User"])
+app.include_router(usuarios.router, prefix="/api/usuarios", tags=["Usuários"])
 app.include_router(tarefas.router, prefix="/api/tarefas", tags=["Tarefas"])
+app.include_router(grupos.router, prefix="/api/grupos", tags=["Grupos"])
+app.include_router(sprints.router, prefix="/api/sprints", tags=["Sprints"])
+app.include_router(tags.router, prefix="/api/tags", tags=["Tags"])
 app.include_router(contratos.router, prefix="/api/contratos", tags=["Contratos"])
 app.include_router(transacoes.router, prefix="/api/transacoes", tags=["Transações"])
 app.include_router(search.router, prefix="/api/search", tags=["Busca"])
-app.include_router(grupos.router, prefix="/api/grupos", tags=["Grupos"])
-app.include_router(sprints.router, prefix="/api/sprints", tags=["Sprints"])
 
 
 @app.get("/")

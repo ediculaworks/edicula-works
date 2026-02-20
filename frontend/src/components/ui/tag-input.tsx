@@ -2,35 +2,36 @@
 
 import { useState } from "react"
 import { X, Plus, Tag } from "lucide-react"
-import { mockTags, getTagById } from "@/lib/mock-data"
+import type { Tag as TagType } from "@/types"
 import { cn } from "@/lib/utils"
 
 interface TagInputProps {
   value: string[]
   onChange: (tags: string[]) => void
+  tags?: TagType[]
   className?: string
 }
 
-export function TagInput({ value, onChange, className }: TagInputProps) {
+export function TagInput({ value, onChange, tags = [], className }: TagInputProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [newTag, setNewTag] = useState("")
 
-  const availableTags = mockTags.filter(tag => !value.includes(tag.id))
+  const availableTags = tags.filter(tag => !value.includes(tag.nome))
 
-  const addTag = (tagId: string) => {
-    onChange([...value, tagId])
+  const addTag = (tagName: string) => {
+    onChange([...value, tagName])
     setIsOpen(false)
   }
 
-  const removeTag = (tagId: string) => {
-    onChange(value.filter(t => t !== tagId))
+  const removeTag = (tagName: string) => {
+    onChange(value.filter(t => t !== tagName))
   }
 
   const createTag = () => {
     if (!newTag.trim()) return
-    const tagId = newTag.toLowerCase().replace(/\s+/g, "-")
-    if (!value.includes(tagId)) {
-      onChange([...value, tagId])
+    const tagName = newTag.trim().toLowerCase().replace(/\s+/g, "-")
+    if (!value.includes(tagName)) {
+      onChange([...value, tagName])
     }
     setNewTag("")
     setIsOpen(false)
@@ -41,11 +42,11 @@ export function TagInput({ value, onChange, className }: TagInputProps) {
       {/* Selected tags */}
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {value.map(tagId => {
-            const tag = getTagById(tagId)
+          {value.map(tagName => {
+            const tag = tags.find(t => t.nome === tagName)
             return (
               <span
-                key={tagId}
+                key={tagName}
                 className="flex items-center gap-1 rounded-full px-2 py-1 text-xs"
                 style={{ 
                   backgroundColor: tag ? `${tag.cor}20` : "var(--surface-hover)",
@@ -53,10 +54,10 @@ export function TagInput({ value, onChange, className }: TagInputProps) {
                 }}
               >
                 <Tag className="h-3 w-3" />
-                {tag?.label || tagId}
+                {tag?.nome || tagName}
                 <button
                   type="button"
-                  onClick={() => removeTag(tagId)}
+                  onClick={() => removeTag(tagName)}
                   className="ml-1 hover:opacity-70"
                 >
                   <X className="h-3 w-3" />
@@ -87,14 +88,14 @@ export function TagInput({ value, onChange, className }: TagInputProps) {
                 <button
                   key={tag.id}
                   type="button"
-                  onClick={() => addTag(tag.id)}
+                  onClick={() => addTag(tag.nome)}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-[var(--surface-hover)]"
                 >
                   <span 
                     className="h-3 w-3 rounded-full" 
                     style={{ backgroundColor: tag.cor }}
                   />
-                  <span>{tag.label}</span>
+                  <span>{tag.nome}</span>
                 </button>
               ))}
 

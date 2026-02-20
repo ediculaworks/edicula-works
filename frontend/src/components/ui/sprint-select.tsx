@@ -2,20 +2,20 @@
 
 import { useState } from "react"
 import { ChevronDown, Check, Zap } from "lucide-react"
-import { mockSprints, getSprintById } from "@/lib/mock-data"
 import type { Sprint } from "@/types"
 import { cn } from "@/lib/utils"
 
 interface SprintSelectProps {
   value: number | null
   onChange: (sprintId: number | null) => void
+  sprints?: Sprint[]
   placeholder?: string
   className?: string
 }
 
-export function SprintSelect({ value, onChange, placeholder = "Selecionar...", className }: SprintSelectProps) {
+export function SprintSelect({ value, onChange, sprints = [], placeholder = "Selecionar...", className }: SprintSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const selectedSprint = value ? getSprintById(value) : null
+  const selectedSprint = value ? sprints.find(s => s.id === value) : null
 
   return (
     <div className={cn("relative", className)}>
@@ -41,7 +41,7 @@ export function SprintSelect({ value, onChange, placeholder = "Selecionar...", c
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute z-50 mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] py-1 shadow-xl">
-            {mockSprints.map((sprint) => (
+            {sprints.map((sprint) => (
               <button
                 key={sprint.id}
                 type="button"

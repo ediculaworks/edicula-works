@@ -43,9 +43,12 @@ import {
   RefreshCw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Tarefa, Prioridade, ColunaKanban, StatusTarefa } from "@/types"
-import { mockUsuarios, mockGrupos, mockSprints, mockTags } from "@/lib/mock-data"
+import type { Tarefa, Prioridade, ColunaKanban, StatusTarefa, Usuario, Grupo, Sprint, Tag as TagType } from "@/types"
 import { useTarefas } from "@/hooks/useTarefas"
+import { useUsuarios } from "@/hooks/useUsuarios"
+import { useTags } from "@/hooks/useTags"
+import { useGrupos } from "@/hooks/useGrupos"
+import { useSprints } from "@/hooks/useSprints"
 
 const EMPRESA_ID = 1
 
@@ -80,31 +83,6 @@ function getPrioridadeConfig(p: Prioridade) {
 function getStatusConfig(s: StatusTarefa) {
   return statusTarefas.find((st) => st.id === s) || statusTarefas[0]
 }
-
-function getTagConfig(tagId: string) {
-  return mockTags.find((t) => t.id === tagId) || { id: tagId, cor: "#6b7280", label: tagId }
-}
-
-function getUsuarioById(id: number) {
-  return mockUsuarios.find(u => u.id === id)
-}
-
-function getGrupoById(id: number) {
-  return mockGrupos.find(g => g.id === id)
-}
-
-const tarefasExemplo: Tarefa[] = [
-  { id: 1, empresa_id: 1, titulo: "Setup inicial do projeto", descricao: "Configurar estrutura base", coluna: "done", prioridade: "alta", responsaveis: [1], tags: ["infra"], created_at: "2026-02-15T10:00:00Z", updated_at: "2026-02-18T15:00:00Z", tempo_gasto_minutos: 120, ordem: 0, eh_subtarefa: false, status: "concluida", observadores: [], estimativa_horas: 8, grupo_id: 3 },
-  { id: 2, empresa_id: 1, titulo: "Criar schema do banco", descricao: "Schema completo", coluna: "done", prioridade: "alta", responsaveis: [1], tags: ["backend"], created_at: "2026-02-16T10:00:00Z", updated_at: "2026-02-17T15:00:00Z", tempo_gasto_minutos: 180, ordem: 1, eh_subtarefa: false, status: "concluida", observadores: [], estimativa_horas: 12, grupo_id: 2 },
-  { id: 3, empresa_id: 1, titulo: "Implementar API FastAPI", descricao: "Endpoints REST", coluna: "in_progress", prioridade: "alta", responsaveis: [2], prazo: "2026-02-25", tags: ["backend"], created_at: "2026-02-17T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 60, ordem: 0, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 16, grupo_id: 2 },
-  { id: 4, empresa_id: 1, titulo: "Configurar agentes IA", descricao: "OpenClaw", coluna: "todo", prioridade: "media", responsaveis: [3], tags: ["ia"], created_at: "2026-02-18T10:00:00Z", updated_at: "2026-02-18T10:00:00Z", tempo_gasto_minutos: 0, ordem: 0, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 8, grupo_id: 4 },
-  { id: 5, empresa_id: 1, titulo: "Criar interface Kanban", descricao: "Frontend Next.js", coluna: "todo", prioridade: "media", responsaveis: [4], tags: ["frontend"], created_at: "2026-02-18T10:00:00Z", updated_at: "2026-02-18T10:00:00Z", tempo_gasto_minutos: 0, ordem: 1, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 12, grupo_id: 1 },
-  { id: 6, empresa_id: 1, titulo: "Implementar busca semântica", descricao: "pgVector", coluna: "todo", prioridade: "baixa", responsaveis: [1], tags: ["backend", "ia"], created_at: "2026-02-18T10:00:00Z", updated_at: "2026-02-18T10:00:00Z", tempo_gasto_minutos: 0, ordem: 2, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 24, grupo_id: 2 },
-  { id: 7, empresa_id: 1, titulo: "Revisar código", coluna: "review", prioridade: "alta", responsaveis: [1], tags: ["qa"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 0, ordem: 0, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 4, grupo_id: 2 },
-  { id: 8, empresa_id: 1, titulo: "Criar documentação", coluna: "todo", prioridade: "baixa", responsaveis: [1], tags: ["docs"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 0, ordem: 3, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 6, grupo_id: 3 },
-  { id: 9, empresa_id: 1, titulo: "Configurar CI/CD", coluna: "todo", prioridade: "alta", responsaveis: [2], tags: ["infra"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 0, ordem: 4, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 8, grupo_id: 3 },
-  { id: 10, empresa_id: 1, titulo: "Testes unitários", coluna: "in_progress", prioridade: "media", responsaveis: [3], tags: ["qa", "backend"], created_at: "2026-02-19T10:00:00Z", updated_at: "2026-02-19T10:00:00Z", tempo_gasto_minutos: 30, ordem: 1, eh_subtarefa: false, status: "ativa", observadores: [], estimativa_horas: 12, grupo_id: 2 },
-]
 
 interface ContextMenuProps {
   x: number
@@ -274,9 +252,12 @@ interface SortableTaskProps {
   tarefa: Tarefa
   onContextMenu: (e: React.MouseEvent, tarefa: Tarefa) => void
   onClick: (tarefa: Tarefa) => void
+  getUsuarioById: (id: string) => Usuario | undefined
+  getGrupoById: (id: number) => Grupo | undefined
+  getTagById: (id: number) => TagType | undefined
 }
 
-function SortableTask({ tarefa, onContextMenu, onClick }: SortableTaskProps) {
+function SortableTask({ tarefa, onContextMenu, onClick, getUsuarioById, getGrupoById, getTagById }: SortableTaskProps) {
   const {
     attributes,
     listeners,
@@ -295,6 +276,11 @@ function SortableTask({ tarefa, onContextMenu, onClick }: SortableTaskProps) {
   const responsaveis = tarefa.responsaveis.map(id => getUsuarioById(id)).filter(Boolean)
   const grupo = tarefa.grupo_id ? getGrupoById(tarefa.grupo_id) : null
   const status = getStatusConfig(tarefa.status)
+  
+  // Helper to get tag display config
+  function getTagConfig(tagId: string) {
+    return { id: tagId, cor: "#6b7280", label: tagId }
+  }
 
   return (
     <div
@@ -405,9 +391,12 @@ interface ColumnProps {
   page: number
   totalPages: number
   onPageChange: (page: number) => void
+  getUsuarioById: (id: string) => Usuario | undefined
+  getGrupoById: (id: number) => Grupo | undefined
+  getTagById: (id: number) => TagType | undefined
 }
 
-function KanbanColumn({ coluna, tarefas, onAddTask, onContextMenu, onTaskClick, page, totalPages, onPageChange }: ColumnProps) {
+function KanbanColumn({ coluna, tarefas, onAddTask, onContextMenu, onTaskClick, page, totalPages, onPageChange, getUsuarioById, getGrupoById, getTagById }: ColumnProps) {
   const paginatedTarefas = tarefas.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
   return (
@@ -445,6 +434,9 @@ function KanbanColumn({ coluna, tarefas, onAddTask, onContextMenu, onTaskClick, 
                 tarefa={tarefa} 
                 onContextMenu={onContextMenu}
                 onClick={onTaskClick}
+                getUsuarioById={getUsuarioById}
+                getGrupoById={getGrupoById}
+                getTagById={getTagById}
               />
             ))}
           </AnimatePresence>
@@ -493,9 +485,13 @@ interface TaskModalProps {
   isCreating?: boolean
   initialColumn?: ColunaKanban
   editMode?: boolean
+  usuarios: Usuario[]
+  grupos: Grupo[]
+  sprints: Sprint[]
+  tags: TagType[]
 }
 
-function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn = "todo", editMode = false }: TaskModalProps) {
+function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags }: TaskModalProps) {
   const [editModeState, setEditModeState] = useState(!isCreating && editMode)
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
@@ -522,9 +518,9 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
 
   const prioridade = getPrioridadeConfig(formData.prioridade)
   const status = getStatusConfig(formData.status)
-  const responsaveis = formData.responsaveis.map(id => mockUsuarios.find(u => u.id === id)).filter(Boolean)
-  const grupo = formData.grupo_id ? mockGrupos.find(g => g.id === formData.grupo_id) : null
-  const sprint = formData.sprint_id ? mockSprints.find(s => s.id === formData.sprint_id) : undefined
+  const responsaveis = formData.responsaveis.map(id => usuarios.find(u => u.id === id)).filter(Boolean)
+  const grupo = formData.grupo_id ? grupos.find(g => g.id === formData.grupo_id) : null
+  const sprint = formData.sprint_id ? sprints.find(s => s.id === formData.sprint_id) : undefined
 
   const handleSave = () => {
     onSave({
@@ -649,14 +645,14 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
                 <select
                   multiple
-                  value={formData.responsaveis.map(String)}
+                  value={formData.responsaveis}
                   onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => Number(option.value))
+                    const values = Array.from(e.target.selectedOptions, option => option.value)
                     setFormData(prev => ({ ...prev, responsaveis: values }))
                   }}
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm h-24"
                 >
-                  {mockUsuarios.map(u => (
+                  {usuarios.map(u => (
                     <option key={u.id} value={u.id}>{u.nome}</option>
                   ))}
                 </select>
@@ -669,7 +665,7 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm"
                 >
                   <option value="">Selecione...</option>
-                  {mockGrupos.map(g => (
+                  {grupos.map(g => (
                     <option key={g.id} value={g.id}>{g.nome}</option>
                   ))}
                 </select>
@@ -685,7 +681,7 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm"
                 >
                   <option value="">Selecione...</option>
-                  {mockSprints.map(s => (
+                  {sprints.map(s => (
                     <option key={s.id} value={s.id}>{s.nome}</option>
                   ))}
                 </select>
@@ -713,19 +709,19 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
             <div>
               <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Tags</label>
               <div className="flex flex-wrap gap-2">
-                {mockTags.map(tag => (
+                {tags.map(tag => (
                   <button
                     key={tag.id}
                     type="button"
                     onClick={() => {
-                      const newTags = formData.tags.includes(tag.id)
-                        ? formData.tags.filter(t => t !== tag.id)
-                        : [...formData.tags, tag.id]
+                      const newTags = formData.tags.includes(tag.nome)
+                        ? formData.tags.filter(t => t !== tag.nome)
+                        : [...formData.tags, tag.nome]
                       setFormData(prev => ({ ...prev, tags: newTags }))
                     }}
                     className={cn(
                       "rounded-full px-3 py-1 text-sm flex items-center gap-1 transition-colors",
-                      formData.tags.includes(tag.id)
+                      formData.tags.includes(tag.nome)
                         ? "ring-2 ring-offset-1"
                         : "opacity-50 hover:opacity-100"
                     )}
@@ -736,7 +732,7 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
                     }}
                   >
                     <Tag className="h-3.5 w-3.5" />
-                    {tag.label}
+                    {tag.nome}
                   </button>
                 ))}
               </div>
@@ -754,7 +750,7 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag) => {
-                    const tagConfig = getTagConfig(tag)
+                    const tagConfig = tags.find(t => t.nome === tag) || { nome: tag, cor: "#6b7280" }
                     return (
                       <span
                         key={tag}
@@ -762,7 +758,7 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
                         style={{ backgroundColor: `${tagConfig.cor}20`, color: tagConfig.cor }}
                       >
                         <Tag className="h-3.5 w-3.5" />
-                        {tagConfig.label}
+                        {tagConfig.nome}
                       </span>
                     )
                   })}
@@ -857,7 +853,12 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
 
 export default function KanbanPage() {
   const { tarefas: apiTarefas, loading, error, refetch, createTarefa, updateTarefa, deleteTarefa, moveTarefa, iniciarTarefa, pausarTarefa, finalizarTarefa, abandonarTarefa } = useTarefas({ empresaId: EMPRESA_ID })
-  const [tarefas, setTarefas] = useState<Tarefa[]>(tarefasExemplo)
+  const { usuarios, getUsuarioById } = useUsuarios({ empresaId: EMPRESA_ID })
+  const { tags, getTagById } = useTags({ empresaId: EMPRESA_ID })
+  const { grupos, getGrupoById } = useGrupos({ empresaId: EMPRESA_ID })
+  const { sprints } = useSprints({ empresaId: EMPRESA_ID })
+  
+  const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [activeId, setActiveId] = useState<number | null>(null)
   const [showAddTask, setShowAddTask] = useState<ColunaKanban | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState("")
@@ -875,7 +876,7 @@ export default function KanbanPage() {
         setTarefas(apiTarefas)
         setIsApiConnected(true)
       } else {
-        setTarefas(tarefasExemplo)
+        setTarefas([])
         setIsApiConnected(false)
       }
     }
@@ -1191,6 +1192,9 @@ export default function KanbanPage() {
                 page={pages[coluna.id]}
                 totalPages={getTotalPages(coluna.id)}
                 onPageChange={(page) => handlePageChange(coluna.id, page)}
+                getUsuarioById={getUsuarioById}
+                getGrupoById={getGrupoById}
+                getTagById={getTagById}
               />
             ))}
           </div>
@@ -1313,6 +1317,10 @@ export default function KanbanPage() {
             isCreating={isCreating}
             initialColumn={showAddTask || "todo"}
             editMode={openInEditMode}
+            usuarios={usuarios}
+            grupos={grupos}
+            sprints={sprints}
+            tags={tags}
           />
         )}
       </AnimatePresence>
