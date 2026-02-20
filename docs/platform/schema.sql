@@ -48,15 +48,15 @@ CREATE TABLE empresas (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Usuários
+-- Usuários (integrado com Better Auth)
 CREATE TABLE usuarios (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
     
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(100) UNIQUE,
-    password_hash VARCHAR(255),
+    password_hash VARCHAR(255), -- Não usado (Better Auth gerencia senhas)
     
     cargo VARCHAR(100),
     departamento VARCHAR(100),
@@ -76,6 +76,9 @@ CREATE TABLE usuarios (
     -- Preferences
     tema VARCHAR(20) DEFAULT 'light',
     linguagem VARCHAR(10) DEFAULT 'pt-BR',
+    
+    -- Link com Better Auth
+    auth_user_id UUID REFERENCES auth.user(id) ON DELETE SET NULL,
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -131,7 +134,7 @@ CREATE TABLE configuracoes_empresa (
 -- Configurações por Usuário
 CREATE TABLE configuracoes_usuario (
     id SERIAL PRIMARY KEY,
-    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE UNIQUE,
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE UNIQUE,
     
     tema VARCHAR(20) DEFAULT 'light',
     linguagem VARCHAR(10) DEFAULT 'pt-BR',
@@ -190,7 +193,7 @@ CREATE TABLE projetos (
     -- Embedding para busca semântica
     embedding vector(1536),
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -218,7 +221,7 @@ CREATE TABLE tarefas (
     tempo_gasto_minutos INTEGER DEFAULT 0,
     
     -- Responsáveis
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     responsaveis INTEGER[] DEFAULT '{}',
     
     -- Relatórios
@@ -362,7 +365,7 @@ CREATE TABLE comentarios (
     menciona_usuarios INTEGER[],
     
     -- Autor
-    usuario_id INTEGER REFERENCES usuarios(id),
+    usuario_id UUID REFERENCES usuarios(id),
     
     -- Edit
     editado BOOLEAN DEFAULT false,
@@ -399,7 +402,7 @@ CREATE TABLE anexos (
     thumbnail_url VARCHAR(500),
     
     -- Upload
-    upload_por INTEGER REFERENCES usuarios(id),
+    upload_por UUID REFERENCES usuarios(id),
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -452,7 +455,7 @@ CREATE TABLE historico_tarefas (
     tarefa_id INTEGER REFERENCES tarefas(id) ON DELETE CASCADE,
     
     -- Quem fez
-    usuario_id INTEGER REFERENCES usuarios(id),
+    usuario_id UUID REFERENCES usuarios(id),
     
     -- O que mudou
     acao VARCHAR(50) NOT NULL, -- created, updated, deleted, moved, commented
@@ -585,7 +588,7 @@ CREATE TABLE contratos (
     -- Embedding para busca semântica
     embedding vector(1536),
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -612,7 +615,7 @@ CREATE TABLE contrato_renovacoes (
     -- Observações
     observacoes TEXT,
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -627,7 +630,7 @@ CREATE TABLE contrato_anexos (
     tipo_mime VARCHAR(100),
     tamanho_bytes INTEGER,
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -769,7 +772,7 @@ CREATE TABLE transacoes (
     -- Embedding
     embedding vector(1536),
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -822,7 +825,7 @@ CREATE TABLE faturas (
     -- NF-e
     chave_acesso VARCHAR(44),
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -892,7 +895,7 @@ CREATE TABLE orcamentos (
     -- Arquivo
     arquivo_url VARCHAR(500),
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -977,7 +980,7 @@ CREATE TABLE documentos (
     -- Embedding para busca semântica
     embedding vector(1536),
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -1019,7 +1022,7 @@ CREATE TABLE documento_tags (
 CREATE TABLE conversas (
     id SERIAL PRIMARY KEY,
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    usuario_id INTEGER REFERENCES usuarios(id),
+    usuario_id UUID REFERENCES usuarios(id),
     
     -- Agente
     agente VARCHAR(50) NOT NULL, -- chief, tech, gestao, financeiro, security, ops
@@ -1087,7 +1090,7 @@ CREATE TABLE embeddings_cache (
 CREATE TABLE buscas_salvas (
     id SERIAL PRIMARY KEY,
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    usuario_id INTEGER REFERENCES usuarios(id),
+    usuario_id UUID REFERENCES usuarios(id),
     
     nome VARCHAR(255) NOT NULL,
     query VARCHAR(500),
@@ -1105,7 +1108,7 @@ CREATE TABLE buscas_salvas (
 CREATE TABLE notificacoes (
     id SERIAL PRIMARY KEY,
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
     
     -- Tipo
     tipo VARCHAR(50) NOT NULL, -- tarefa, contrato, fatura, sistema
@@ -1183,7 +1186,7 @@ CREATE TABLE webhooks (
     -- Status
     ativo BOOLEAN DEFAULT true,
     
-    created_by INTEGER REFERENCES usuarios(id),
+    created_by UUID REFERENCES usuarios(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -1219,7 +1222,7 @@ CREATE TABLE audit_logs (
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
     
     -- Usuário
-    usuario_id INTEGER REFERENCES usuarios(id),
+    usuario_id UUID REFERENCES usuarios(id),
     ip VARCHAR(45),
     user_agent TEXT,
     
@@ -1242,7 +1245,7 @@ CREATE TABLE audit_logs (
 CREATE TABLE sessoes (
     id SERIAL PRIMARY KEY,
     empresa_id INTEGER REFERENCES empresas(id) ON DELETE CASCADE,
-    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,
     
     -- Token
     token VARCHAR(255) NOT NULL,
@@ -1383,19 +1386,23 @@ VALUES
 INSERT INTO configuracoes_empresa (empresa_id, email_principal, email_suporte, email_financeiro)
 VALUES (1, 'contato@ediculaworks.com', 'suporte@ediculaworks.com', 'financeiro@ediculaworks.com');
 
--- Usuários (senha: changeme123 - SHA256)
-INSERT INTO usuarios (empresa_id, nome, email, cargo, role, perfil_id)
-VALUES 
-(1, 'Lucas Drummond', 'lucas@ediculaworks.com', 'CEO', 'admin', 1),
-(1, 'Matheus Guim', 'matheus@ediculaworks.com', 'Desenvolvedor', 'member', 3),
-(1, 'Luca Junqueira', 'luca@ediculaworks.com', 'Desenvolvedor', 'member', 3),
-(1, 'João Pedro Santana', 'joao@ediculaworks.com', 'Desenvolvedor', 'member', 3),
-(1, 'Gabriel Fonseca', 'gabriel@ediculaworks.com', 'Desenvolvedor', 'member', 3),
-(1, 'Guilherme Sad', 'guilherme@ediculaworks.com', 'Desenvolvedor', 'member', 3);
+-- Usuários serão criados via Better Auth
+-- O trigger sync_auth_user_to_usuarios cria automaticamente na tabela usuarios
+-- quando um usuário é criado em auth.user
 
--- Configurações de Usuário
-INSERT INTO configuracoes_usuario (usuario_id)
-SELECT id FROM usuarios;
+-- Para criar um admin inicial, use o seguinte SQL após configurar o Better Auth:
+-- INSERT INTO auth.user (id, name, email, email_verified)
+-- VALUES (gen_random_uuid(), 'Admin', 'admin@ediculaworks.com', true);
+-- INSERT INTO auth.account (user_id, account_id, provider_id, password)
+-- VALUES (
+--   (SELECT id FROM auth.user WHERE email = 'admin@ediculaworks.com'),
+--   'admin@ediculaworks.com',
+--   'credential',
+--   '$2a$10$...' -- bcrypt hash da senha
+-- );
+
+-- Perfis padrão para os usuários (quando criados via Better Auth, terão perfil_id null)
+-- Atribuir perfil via UPDATE após criar usuários
 
 -- Categorias Financeiras Padrão
 INSERT INTO categorias_financeiras (empresa_id, nome, tipo, cor, icone) VALUES
@@ -1535,6 +1542,61 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ============================================================
+-- TRIGGERS - Sincronização Better Auth
+-- ============================================================
+
+-- Trigger para sincronizar auth.user -> usuarios (INSERT)
+CREATE OR REPLACE FUNCTION sync_auth_user_to_usuarios()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.usuarios (auth_user_id, nome, email, avatar_url, email_verificado, role, ativo)
+    VALUES (
+        NEW.id,
+        COALESCE(NEW.name, split_part(NEW.email, '@', 1)),
+        NEW.email,
+        NEW.image,
+        NEW.email_verified,
+        'member',
+        true
+    )
+    ON CONFLICT (email) DO UPDATE SET
+        nome = COALESCE(NEW.name, EXCLUDED.nome),
+        avatar_url = NEW.image,
+        email_verificado = NEW.email_verified,
+        auth_user_id = NEW.id,
+        updated_at = NOW();
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.user
+FOR EACH ROW
+EXECUTE FUNCTION sync_auth_user_to_usuarios();
+
+-- Trigger para sincronizar auth.user -> usuarios (UPDATE)
+CREATE OR REPLACE FUNCTION update_auth_user_sync()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE public.usuarios
+    SET 
+        nome = COALESCE(NEW.name, nome),
+        avatar_url = NEW.image,
+        email_verificado = NEW.email_verified,
+        updated_at = NOW()
+    WHERE auth_user_id = NEW.id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_auth_user_updated
+AFTER UPDATE ON auth.user
+FOR EACH ROW
+EXECUTE FUNCTION update_auth_user_sync();
 
 -- ============================================================
 -- FIM DO SCHEMA

@@ -2,20 +2,30 @@
 
 import { usePathname } from "next/navigation"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { SessionProvider } from "@/components/providers/session-provider"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <PageTransitionWrapper>
-        {children}
-      </PageTransitionWrapper>
+      <SessionProvider>
+        <PageTransitionWrapper>
+          {children}
+        </PageTransitionWrapper>
+      </SessionProvider>
     </ThemeProvider>
   )
 }
 
 function PageTransitionWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  
+  // Desabilitar transições na página de login
+  const isLoginPage = pathname === "/login"
+
+  if (isLoginPage) {
+    return <>{children}</>
+  }
 
   return (
     <AnimatePresence mode="wait">
