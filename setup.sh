@@ -223,22 +223,22 @@ EOF
 {"agents":{"defaults":{"model":{"primary":"openrouter/anthropic/claude-3-haiku"}},"list":[{"id":"chief","name":"Chief"},{"id":"tech","name":"Tech Lead"},{"id":"gestao","name":"Gestão"},{"id":"financeiro","name":"Financeiro"},{"id":"security","name":"Security"},{"id":"ops","name":"Ops"}]}}
 EOF
             ;;
-        9)  cd "$PROJECT_DIR" && docker compose build ;;
-        10) apt install -y nginx certbot python3-certbot-nginx
+        10) cd "$PROJECT_DIR" && docker compose build ;;
+        11) apt install -y nginx certbot python3-certbot-nginx
             if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
                 systemctl stop nginx
                 certbot certonly --standalone -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --non-interactive
             fi
             systemctl enable certbot.timer
             ;;
-        11) mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+        12) mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
             sed -i "s/ediculaworks.com/$DOMAIN/g" "$PROJECT_DIR/config/nginx.conf"
             cp "$PROJECT_DIR/config/nginx.conf" /etc/nginx/sites-available/ediculaworks
             ln -sf /etc/nginx/sites-available/ediculaworks /etc/nginx/sites-enabled/
             rm -f /etc/nginx/sites-enabled/default
             nginx -t && systemctl enable nginx && systemctl restart nginx
             ;;
-        12) cd "$PROJECT_DIR"
+        13) cd "$PROJECT_DIR"
             git config --global --add safe.directory "$PROJECT_DIR"
             git pull
             docker compose down 2>/dev/null || true
@@ -247,7 +247,7 @@ EOF
             log_info "Containers iniciados"
             docker compose ps
             ;;
-        13) log_info "Configurando chave SSH..."
+        14) log_info "Configurando chave SSH..."
             mkdir -p /home/$USER/.ssh
             chmod 700 /home/$USER/.ssh
             
