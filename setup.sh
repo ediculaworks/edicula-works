@@ -76,8 +76,15 @@ EOF
         cd "$PROJECT_DIR"
         docker compose build
         
+        # Instalar Nginx
+        log_info "4b/5 - Instalando Nginx..."
+        apt install -y nginx
+        
         # 5. Nginx + Iniciar
         log_info "5/5 - Configurando Nginx..."
+        
+        # Criar diretórios necessários
+        mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
         
         # Usar config HTTP simples
         cat > /etc/nginx/sites-available/ediculaworks << 'NGINX'
