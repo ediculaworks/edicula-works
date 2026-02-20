@@ -148,9 +148,7 @@ ENVEOF
             
             log_info "Criando schema Better Auth..."
             PGPASSWORD=$(echo "$DB_URL" | grep -oP '(?<=:)[^@]+(?=@)') psql "$DB_URL" -c "
-                CREATE SCHEMA IF NOT EXISTS better_auth;
-                
-                CREATE TABLE IF NOT EXISTS better_auth.\"user\" (
+                CREATE TABLE IF NOT EXISTS public.\"user\" (
                     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                     name VARCHAR(255),
                     email VARCHAR(255) UNIQUE NOT NULL,
@@ -160,9 +158,9 @@ ENVEOF
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
                 
-                CREATE TABLE IF NOT EXISTS better_auth.session (
+                CREATE TABLE IF NOT EXISTS public.session (
                     id VARCHAR(255) PRIMARY KEY,
-                    user_id UUID NOT NULL REFERENCES better_auth.\"user\"(id) ON DELETE CASCADE,
+                    user_id UUID NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
                     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
                     token VARCHAR(255),
                     ip_address VARCHAR(45),
@@ -171,9 +169,9 @@ ENVEOF
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
                 
-                CREATE TABLE IF NOT EXISTS better_auth.account (
+                CREATE TABLE IF NOT EXISTS public.account (
                     id VARCHAR(255) PRIMARY KEY,
-                    user_id UUID NOT NULL REFERENCES better_auth.\"user\"(id) ON DELETE CASCADE,
+                    user_id UUID NOT NULL REFERENCES public.\"user\"(id) ON DELETE CASCADE,
                     account_id VARCHAR(255),
                     provider_id VARCHAR(255),
                     access_token TEXT,
@@ -187,7 +185,7 @@ ENVEOF
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
                 
-                CREATE TABLE IF NOT EXISTS better_auth.verification (
+                CREATE TABLE IF NOT EXISTS public.verification (
                     id VARCHAR(255) PRIMARY KEY,
                     identifier VARCHAR(255) NOT NULL,
                     value VARCHAR(255) NOT NULL,
@@ -196,13 +194,13 @@ ENVEOF
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
                 
-                CREATE INDEX IF NOT EXISTS idx_user_email ON better_auth.\"user\"(email);
-                CREATE INDEX IF NOT EXISTS idx_session_user_id ON better_auth.session(user_id);
-                CREATE INDEX IF NOT EXISTS idx_account_user_id ON better_auth.account(user_id);
+                CREATE INDEX IF NOT EXISTS idx_user_email ON public.\"user\"(email);
+                CREATE INDEX IF NOT EXISTS idx_session_user_id ON public.session(user_id);
+                CREATE INDEX IF NOT EXISTS idx_account_user_id ON public.account(user_id);
             " || log_warn "Schema pode já existir"
             
             log_info "Criando usuário admin..."
-            psql "$DB_URL" -c "INSERT INTO better_auth.\"user\" (name, email, email_verified) VALUES ('Admin', 'admin@ediculaworks.com', true) ON CONFLICT (email) DO NOTHING;" || true
+            psql "$DB_URL" -c "INSERT INTO public.\"user\" (name, email, email_verified) VALUES ('Admin', 'admin@ediculaworks.com', true) ON CONFLICT (email) DO NOTHING;" || true
             log_info "Schema Better Auth configurado ✓"
             ;;
         9)  mkdir -p /etc/openclaw
