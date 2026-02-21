@@ -358,7 +358,7 @@ CREATE INDEX IF NOT EXISTS idx_sprints_projeto ON sprints(projeto_id);
 
 -- Contratos indexes
 CREATE INDEX IF NOT EXISTS idx_contratos_empresa ON contratos(empresa_id);
-CREATE INDEX NOT EXISTS idx_contratos_status ON contratos(status);
+CREATE INDEX IF NOT EXISTS idx_contratos_status ON contratos(status);
 
 -- Transacoes indexes
 CREATE INDEX IF NOT EXISTS idx_transacoes_empresa ON transacoes(empresa_id);
