@@ -25,7 +25,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:18789", "https://edihub.work.gd", "http://edihub.work.gd"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:18789", 
+        "https://edihub.work.gd", 
+        "http://edihub.work.gd",
+        "http://31.97.164.206",
+        "http://31.97.164.206:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
