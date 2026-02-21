@@ -6,18 +6,13 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Tarefa, Prioridade, StatusTarefa, ColunaKanban, Usuario, Grupo, Sprint, Tag as TagType } from "@/types"
-import {
-  Plus,
-  Search,
-  Calendar,
-  Flag,
-  Clock,
-  Users,
-  ChevronRight,
+import { 
+  Plus, 
+  Calendar, 
+  Flag, 
+  Clock, 
+  GripVertical,
   X,
-  SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight as ChevronRightIcon,
   Tag,
   Edit,
   Trash2,
@@ -25,6 +20,11 @@ import {
   Download,
   UserPlus,
   Play,
+  MoreHorizontal,
+  SlidersHorizontal,
+  Filter,
+  CheckCircle,
+  Pause,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTarefas } from "@/hooks/useTarefas"
@@ -68,7 +68,6 @@ const colunas: { id: ColunaKanban; titulo: string; cor: string }[] = [
 ]
 
 interface Filtros {
-  busca?: string
   prioridade?: Prioridade
   status?: StatusTarefa
 }
@@ -242,9 +241,6 @@ export default function TarefasPage() {
   }
 
   const tarefasFiltradas = tarefas.filter((tarefa) => {
-    if (filtros.busca && !tarefa.titulo.toLowerCase().includes(filtros.busca.toLowerCase())) {
-      return false
-    }
     if (filtros.prioridade && tarefa.prioridade !== filtros.prioridade) {
       return false
     }
@@ -335,21 +331,8 @@ export default function TarefasPage() {
   return (
     <DashboardLayout>
       <div className="flex h-full flex-col">
-        {/* Search & Filters */}
+        {/* Filters */}
         <div className="mb-4 flex gap-3 shrink-0">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground)]/40 z-20 pointer-events-none" />
-            <Input
-              placeholder="Buscar..."
-              className="pl-11"
-              value={filtros.busca || ""}
-              onChange={(e) => {
-                setFiltros((prev) => ({ ...prev, busca: e.target.value }))
-                setPage(1)
-              }}
-            />
-          </div>
-
           <Button
             variant={showFilters ? "default" : "outline"}
             onClick={() => setShowFilters(!showFilters)}

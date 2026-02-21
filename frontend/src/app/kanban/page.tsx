@@ -860,8 +860,6 @@ export default function KanbanPage() {
   
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [activeId, setActiveId] = useState<number | null>(null)
-  const [showAddTask, setShowAddTask] = useState<ColunaKanban | null>(null)
-  const [newTaskTitle, setNewTaskTitle] = useState("")
   const [pages, setPages] = useState<Record<ColunaKanban, number>>({
     todo: 1,
     in_progress: 1,
@@ -893,6 +891,7 @@ export default function KanbanPage() {
   const [selectedTask, setSelectedTask] = useState<Tarefa | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [openInEditMode, setOpenInEditMode] = useState(false)
+  const [initialColumn, setInitialColumn] = useState<ColunaKanban>("todo")
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -964,66 +963,11 @@ export default function KanbanPage() {
     setActiveId(null)
   }
 
-  const handleAddTask = async (coluna: ColunaKanban) => {
-    if (!newTaskTitle.trim()) {
-      setShowAddTask(null)
-      return
-    }
-
-    const novaTarefaBase = {
-      titulo: newTaskTitle,
-      coluna,
-      prioridade: "media" as const,
-      empresa_id: EMPRESA_ID,
-    }
-
-    if (isApiConnected) {
-      try {
-        const nova = await createTarefa(novaTarefaBase)
-        setTarefas((prev) => [...prev, nova])
-      } catch (err) {
-        console.error('Erro ao criar tarefa:', err)
-        const novaTarefa: Tarefa = {
-          id: Date.now(),
-          empresa_id: EMPRESA_ID,
-          titulo: newTaskTitle,
-          coluna,
-          prioridade: "media",
-          responsaveis: [],
-          tags: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          tempo_gasto_minutos: 0,
-          ordem: getTarefasPorColuna(coluna).length,
-          eh_subtarefa: false,
-          status: "ativa",
-          observadores: [],
-        }
-        setTarefas((prev) => [...prev, novaTarefa])
-      }
-    } else {
-      const novaTarefa: Tarefa = {
-        id: Date.now(),
-        empresa_id: EMPRESA_ID,
-        titulo: newTaskTitle,
-        coluna,
-        prioridade: "media",
-        responsaveis: [],
-        tags: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        tempo_gasto_minutos: 0,
-        ordem: getTarefasPorColuna(coluna).length,
-        eh_subtarefa: false,
-        status: "ativa",
-        observadores: [],
-      }
-      setTarefas((prev) => [...prev, novaTarefa])
-    }
-    
-    setNewTaskTitle("")
-    setShowAddTask(null)
-    setPages((prev) => ({ ...prev, [coluna]: getTotalPages(coluna) }))
+  const handleAddTask = (coluna: ColunaKanban) => {
+    setSelectedTask(null)
+    setIsCreating(true)
+    setOpenInEditMode(true)
+    setInitialColumn(coluna)
   }
 
   const handleContextMenu = (e: React.MouseEvent, tarefa: Tarefa) => {
@@ -1242,69 +1186,7 @@ export default function KanbanPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Add Task Modal */}
-      <AnimatePresence>
-        {showAddTask && (
-          <motion.div
-            className="modal-backdrop flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowAddTask(null)}
-          >
-            <motion.div
-              className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Nova Tarefa</h3>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowAddTask(null)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <Input
-                placeholder="Título da tarefa..."
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddTask(showAddTask)
-                  }
-                }}
-                autoFocus
-                className="mb-4"
-              />
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowAddTask(null)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  className="glow-button"
-                  onClick={() => handleAddTask(showAddTask)}
-                >
-                  Adicionar
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Task Detail Modal */}
-      <AnimatePresence>
+    </DashboardLayout>
         {(selectedTask || isCreating) && (
           <TaskModal
             tarefa={selectedTask}
@@ -1315,7 +1197,7 @@ export default function KanbanPage() {
             }}
             onSave={handleSaveTask}
             isCreating={isCreating}
-            initialColumn={showAddTask || "todo"}
+            initialColumn={initialColumn}
             editMode={openInEditMode}
             usuarios={usuarios}
             grupos={grupos}

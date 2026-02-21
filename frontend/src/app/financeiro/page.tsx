@@ -6,20 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton, CardSkeleton, ListItemSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
-  Wallet, 
   Plus, 
-  Search, 
-  MoreVertical,
-  TrendingUp,
-  TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
+  Receipt, 
+  TrendingUp, 
+  TrendingDown, 
+  ArrowRightLeft,
   Calendar,
+  MoreVertical,
+  Pencil,
+  Trash2,
   Filter,
-  Receipt,
-  Users,
-  DollarSign,
-  AlertCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { 
@@ -63,7 +59,6 @@ const statusColors = {
 export default function FinanceiroPage() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
   const [filterTipo, setFilterTipo] = useState("")
   const [filterStatus, setFilterStatus] = useState("")
   const [showModal, setShowModal] = useState(false)
@@ -92,9 +87,7 @@ export default function FinanceiroPage() {
     }
   }
 
-  const filteredTransacoes = transacoes.filter(t =>
-    t.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredTransacoes = transacoes
 
   const receitas = transacoes.filter(t => t.tipo === 'receita' && t.status === 'pago').reduce((sum, t) => sum + t.valor, 0)
   const despesas = transacoes.filter(t => t.tipo === 'despesa' && t.status === 'pago').reduce((sum, t) => sum + t.valor, 0)
@@ -314,15 +307,6 @@ export default function FinanceiroPage() {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground)]/40 z-20 pointer-events-none" />
-            <Input
-              placeholder="Buscar transações..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-11"
-            />
-          </div>
           <select
             value={filterTipo}
             onChange={(e) => setFilterTipo(e.target.value)}
@@ -360,9 +344,9 @@ export default function FinanceiroPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Nenhuma transação encontrada</h3>
             <p className="text-sm text-[var(--foreground)]/50 mb-4">
-              {searchTerm || filterTipo || filterStatus ? "Tente ajustar os filtros" : "Comece registrando sua primeira transação"}
+              {filterTipo || filterStatus ? "Tente ajustar os filtros" : "Comece registrando sua primeira transação"}
             </p>
-            {!searchTerm && !filterTipo && !filterStatus && (
+            {!filterTipo && !filterStatus && (
               <Button className="glow-button" onClick={() => { setEditingTransacao(null); setShowModal(true) }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Transação

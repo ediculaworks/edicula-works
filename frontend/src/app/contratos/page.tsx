@@ -6,20 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton, CardSkeleton, ListItemSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
-  FileText, 
   Plus, 
-  Search, 
+  FileSignature, 
+  FileText, 
+  Calendar, 
+  DollarSign, 
   MoreVertical,
-  Calendar,
-  DollarSign,
-  User,
-  Clock,
-  FileSignature,
-  Edit,
+  Pencil,
   Trash2,
-  AlertTriangle,
-  CheckCircle,
-  X,
+  Eye,
+  AlertCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -63,7 +59,6 @@ const tipoLabels: Record<string, string> = {
 export default function ContratosPage() {
   const [contratos, setContratos] = useState<Contrato[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingContrato, setEditingContrato] = useState<Contrato | null>(null)
@@ -90,12 +85,7 @@ export default function ContratosPage() {
     }
   }
 
-  const filteredContratos = contratos.filter(c =>
-    c.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.contraparte_nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.numero?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredContratos = contratos
 
   const stats = {
     total: contratos.length,
@@ -225,15 +215,6 @@ export default function ContratosPage() {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground)]/40 z-20 pointer-events-none" />
-            <Input
-              placeholder="Buscar contratos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-11"
-            />
-          </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -262,9 +243,9 @@ export default function ContratosPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Nenhum contrato encontrado</h3>
             <p className="text-sm text-[var(--foreground)]/50 mb-4">
-              {searchTerm || filterStatus ? "Tente ajustar os filtros" : "Comece criando seu primeiro contrato"}
+              {filterStatus ? "Tente ajustar os filtros" : "Comece criando seu primeiro contrato"}
             </p>
-            {!searchTerm && !filterStatus && (
+            {!filterStatus && (
               <Button className="glow-button" onClick={() => { setEditingContrato(null); setShowModal(true) }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Contrato

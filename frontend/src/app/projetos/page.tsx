@@ -7,22 +7,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton, CardSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
-  FolderKanban, 
   Plus, 
-  Search, 
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  User,
+  FolderKanban, 
   FolderOpen,
-  X,
-  Check,
-  Clock,
   Play,
   Pause,
+  CheckCircle,
   Archive,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Calendar,
+  DollarSign,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -64,7 +60,6 @@ export default function ProjetosPage() {
   const router = useRouter()
   const [projetos, setProjetos] = useState<Projeto[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingProjeto, setEditingProjeto] = useState<Projeto | null>(null)
@@ -92,11 +87,7 @@ export default function ProjetosPage() {
     }
   }
 
-  const filteredProjetos = projetos.filter(p =>
-    p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.cliente_nome?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredProjetos = projetos
 
   const stats = {
     total: projetos.length,
@@ -203,15 +194,6 @@ export default function ProjetosPage() {
 
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground)]/40 z-20 pointer-events-none" />
-            <Input
-              placeholder="Buscar projetos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-11"
-            />
-          </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -239,9 +221,9 @@ export default function ProjetosPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Nenhum projeto encontrado</h3>
             <p className="text-sm text-[var(--foreground)]/50 mb-4">
-              {searchTerm ? "Tente buscar por outro termo" : "Comece criando seu primeiro projeto"}
+              {filterStatus ? "Tente ajustar os filtros" : "Comece criando seu primeiro projeto"}
             </p>
-            {!searchTerm && (
+            {!filterStatus && (
               <Button className="glow-button" onClick={() => { setEditingProjeto(null); setSelectedColor("#3b82f6"); setShowModal(true) }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Projeto
