@@ -41,7 +41,7 @@ class TarefaCreate(BaseModel):
     
     prazo: Optional[date] = None
     
-    responsaveis: Optional[List[str]] = []
+    responsaveis: Optional[List[int]] = []
     cliente_nome: Optional[str] = None
     
     tarefa_pai_id: Optional[int] = None
@@ -53,7 +53,7 @@ class TarefaCreate(BaseModel):
     status: Status = Status.ativa
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
-    observadores: Optional[List[str]] = []
+    observadores: Optional[List[int]] = []
     previsao_entrega: Optional[date] = None
     estimativa_horas_prevista: Optional[float] = None
     data_inicio: Optional[datetime] = None
@@ -77,7 +77,7 @@ class TarefaUpdate(BaseModel):
     prazo: Optional[date] = None
     data_conclusao: Optional[datetime] = None
     
-    responsaveis: Optional[List[str]] = None
+    responsaveis: Optional[List[int]] = None
     cliente_nome: Optional[str] = None
     
     tarefa_pai_id: Optional[int] = None
@@ -92,7 +92,7 @@ class TarefaUpdate(BaseModel):
     status: Optional[str] = None
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
-    observadores: Optional[List[str]] = None
+    observadores: Optional[List[int]] = None
     previsao_entrega: Optional[date] = None
     estimativa_horas_prevista: Optional[float] = None
     data_inicio: Optional[datetime] = None
@@ -123,7 +123,7 @@ class TarefaResponse(BaseModel):
     data_conclusao: Optional[datetime]
     tempo_gasto_minutos: int
     
-    responsaveis: List[str]
+    responsaveis: List[int]
     created_by: Optional[int]
     cliente_nome: Optional[str]
     
@@ -138,7 +138,7 @@ class TarefaResponse(BaseModel):
     status: str = "ativa"
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
-    observadores: List[str] = []
+    observadores: List[int] = []
     previsao_entrega: Optional[date] = None
     estimativa_horas_prevista: Optional[float] = None
     data_inicio: Optional[datetime] = None
