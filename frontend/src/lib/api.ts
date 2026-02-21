@@ -285,6 +285,35 @@ export const api = {
     return handleResponse<Usuario>(response)
   },
 
+  async createUsuario(data: { empresa_id: number; nome: string; email: string; role?: string }) {
+    const cleanData = removeUndefined(data)
+    const response = await fetch(`${API_BASE}/usuarios`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cleanData),
+    })
+    return handleResponse<Usuario>(response)
+  },
+
+  async updateUsuario(id: string, data: { nome?: string; email?: string }) {
+    const cleanData = removeUndefined(data)
+    const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cleanData),
+    })
+    return handleResponse<Usuario>(response)
+  },
+
+  async deleteUsuario(id: string) {
+    const response = await fetch(`${API_BASE}/usuarios/${id}`, {
+      method: 'DELETE',
+    })
+    if (response.status !== 204) {
+      throw new ApiError(response.status, 'Erro ao deletar')
+    }
+  },
+
   // Tags
   async getTags(params?: {
     empresa_id?: number
