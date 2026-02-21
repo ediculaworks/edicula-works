@@ -1,26 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 import os
 
 from api.routes import health, system
 from api.routes import projetos, tarefas, grupos, sprints, tags, usuarios, contratos, transacoes, search, chat
-from api.database import engine, Base
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Starting EdiculaWorks API...")
-    Base.metadata.create_all(bind=engine)
-    yield
-    print("Shutting down EdiculaWorks API...")
 
 
 app = FastAPI(
     title="EdiculaWorks API",
     description="API para gestão de tarefas, contratos e análises",
-    version="1.0.0",
-    lifespan=lifespan
+    version="1.0.0"
 )
 
 app.add_middleware(

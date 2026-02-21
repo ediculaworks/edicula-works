@@ -1,25 +1,28 @@
 from typing import Optional, List, Dict, Any
-from api.database import supabase
+from api.database import get_db
 
 
 class SprintService:
     @staticmethod
     def create(data: Dict[str, Any]) -> Dict[str, Any]:
-        result = supabase.table("sprints").insert(data).execute()
+        db = get_db()
+        result = db.table("sprints").insert(data).execute()
         if result.data:
             return result.data[0]
         return {}
     
     @staticmethod
     def get_by_id(sprint_id: int) -> Optional[Dict[str, Any]]:
-        result = supabase.table("sprints").select("*").eq("id", sprint_id).execute()
+        db = get_db()
+        result = db.table("sprints").select("*").eq("id", sprint_id).execute()
         if result.data:
             return result.data[0]
         return None
     
     @staticmethod
     def list(empresa_id: int = 1, projeto_id: Optional[int] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
-        query = supabase.table("sprints").select("*").eq("empresa_id", empresa_id)
+        db = get_db()
+        query = db.table("sprints").select("*").eq("empresa_id", empresa_id)
         if projeto_id is not None:
             query = query.eq("projeto_id", projeto_id)
         if status is not None:
@@ -29,26 +32,30 @@ class SprintService:
     
     @staticmethod
     def get_active(empresa_id: int = 1) -> Optional[Dict[str, Any]]:
-        result = supabase.table("sprints").select("*").eq("empresa_id", empresa_id).eq("status", "ativa").execute()
+        db = get_db()
+        result = db.table("sprints").select("*").eq("empresa_id", empresa_id).eq("status", "ativa").execute()
         if result.data:
             return result.data[0]
         return None
     
     @staticmethod
     def update(sprint_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        result = supabase.table("sprints").update(data).eq("id", sprint_id).execute()
+        db = get_db()
+        result = db.table("sprints").update(data).eq("id", sprint_id).execute()
         if result.data:
             return result.data[0]
         return None
     
     @staticmethod
     def delete(sprint_id: int) -> bool:
-        result = supabase.table("sprints").delete().eq("id", sprint_id).execute()
+        db = get_db()
+        result = db.table("sprints").delete().eq("id", sprint_id).execute()
         return len(result.data) > 0 if result.data else False
     
     @staticmethod
     def update_pontos(sprint_id: int) -> None:
         from api.services.tarefas import TarefaService
+        db = get_db()
         tarefas = TarefaService.list(empresa_id=1, sprint_id=sprint_id, coluna="done")
         pontos = sum(t.get("estimativa_pontos", 0) or 0 for t in tarefas)
-        supabase.table("sprints").update({"pontos_concluidos": pontos}).eq("id", sprint_id).execute()
+        db.table("sprints").update({"pontos_concluidos": pontos}).eq("id", sprint_id).execute()
