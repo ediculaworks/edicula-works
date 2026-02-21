@@ -588,6 +588,27 @@ export default function TarefasPage() {
               setIsCreating(false)
               setOpenInEditMode(false)
             }}
+            onStart={() => {
+              if (tarefaSelecionada) {
+                handleStartTask(tarefaSelecionada)
+                setTarefaSelecionada(null)
+                setOpenInEditMode(false)
+              }
+            }}
+            onPause={() => {
+              if (tarefaSelecionada) {
+                handlePauseTask(tarefaSelecionada)
+                setTarefaSelecionada(null)
+                setOpenInEditMode(false)
+              }
+            }}
+            onFinish={() => {
+              if (tarefaSelecionada) {
+                handleFinishTask(tarefaSelecionada)
+                setTarefaSelecionada(null)
+                setOpenInEditMode(false)
+              }
+            }}
             isCreating={isCreating}
             editMode={openInEditMode}
             usuarios={usuarios}
@@ -633,6 +654,9 @@ interface TarefaModalProps {
   tarefa: Tarefa | null
   onClose: () => void
   onSave: (tarefa: Tarefa) => void
+  onStart?: () => void
+  onPause?: () => void
+  onFinish?: () => void
   isCreating?: boolean
   editMode?: boolean
   usuarios: Usuario[]
@@ -641,7 +665,7 @@ interface TarefaModalProps {
   tags: TagType[]
 }
 
-function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = false, usuarios, grupos, sprints, tags }: TarefaModalProps) {
+function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCreating = false, editMode = false, usuarios, grupos, sprints, tags }: TarefaModalProps) {
   const [editModeState, setEditModeState] = useState(isCreating || editMode)
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
@@ -654,6 +678,7 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
         prioridade: "media",
         responsaveis: [],
         tags: [],
+        sprint_id: undefined,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         tempo_gasto_minutos: 0,
@@ -988,16 +1013,16 @@ function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = f
                 Editar
               </Button>
               {formData.status !== "ativa" && (
-                <Button size="sm" className="glow-button">
+                <Button size="sm" className="glow-button" onClick={onStart}>
                   Iniciar
                 </Button>
               )}
               {formData.status === "ativa" && (
                 <>
-                  <Button size="sm" variant="outline" className="glow-button-outline">
+                  <Button size="sm" variant="outline" className="glow-button-outline" onClick={onPause}>
                     Pausar
                   </Button>
-                  <Button size="sm" variant="outline" className="glow-button-outline">
+                  <Button size="sm" variant="outline" className="glow-button-outline" onClick={onFinish}>
                     Finalizar
                   </Button>
                 </>

@@ -482,6 +482,9 @@ interface TaskModalProps {
   tarefa: Tarefa | null
   onClose: () => void
   onSave: (tarefa: Tarefa) => void
+  onStart?: () => void
+  onPause?: () => void
+  onFinish?: () => void
   isCreating?: boolean
   initialColumn?: ColunaKanban
   editMode?: boolean
@@ -491,7 +494,7 @@ interface TaskModalProps {
   tags: TagType[]
 }
 
-function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags }: TaskModalProps) {
+function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags }: TaskModalProps) {
   const [editModeState, setEditModeState] = useState(isCreating || editMode)
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
@@ -504,6 +507,7 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
         prioridade: "media",
         responsaveis: [],
         tags: [],
+        sprint_id: undefined,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         tempo_gasto_minutos: 0,
@@ -829,16 +833,16 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
                 Editar
               </Button>
               {formData.status !== "ativa" && (
-                <Button size="sm" className="glow-button">
+                <Button size="sm" className="glow-button" onClick={onStart}>
                   Iniciar
                 </Button>
               )}
               {formData.status === "ativa" && (
                 <>
-                  <Button size="sm" variant="outline" className="glow-button-outline">
+                  <Button size="sm" variant="outline" className="glow-button-outline" onClick={onPause}>
                     Pausar
                   </Button>
-                  <Button size="sm" variant="outline" className="glow-button-outline">
+                  <Button size="sm" variant="outline" className="glow-button-outline" onClick={onFinish}>
                     Finalizar
                   </Button>
                 </>
@@ -1217,6 +1221,27 @@ export default function KanbanPage() {
               setOpenInEditMode(false)
             }}
             onSave={handleSaveTask}
+            onStart={() => {
+              if (selectedTask) {
+                handleStart(selectedTask)
+                setSelectedTask(null)
+                setOpenInEditMode(false)
+              }
+            }}
+            onPause={() => {
+              if (selectedTask) {
+                handlePause(selectedTask)
+                setSelectedTask(null)
+                setOpenInEditMode(false)
+              }
+            }}
+            onFinish={() => {
+              if (selectedTask) {
+                handleFinish(selectedTask)
+                setSelectedTask(null)
+                setOpenInEditMode(false)
+              }
+            }}
             isCreating={isCreating}
             initialColumn={initialColumn}
             editMode={openInEditMode}
