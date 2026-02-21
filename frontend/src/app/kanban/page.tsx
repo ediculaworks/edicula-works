@@ -641,19 +641,26 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
-                <select
-                  multiple
-                  value={formData.responsaveis.map(String)}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => Number(option.value))
-                    setFormData(prev => ({ ...prev, responsaveis: values }))
-                  }}
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm h-24"
-                >
+                <div className="space-y-2 border border-[var(--border)] rounded-lg p-2 max-h-32 overflow-y-auto">
                   {usuarios.map(u => (
-                    <option key={u.id} value={u.id}>{u.nome}</option>
+                    <label key={u.id} className="flex items-center gap-2 cursor-pointer hover:bg-[var(--surface-hover)] p-1 rounded">
+                      <input
+                        type="checkbox"
+                        checked={formData.responsaveis.includes(Number(u.id))}
+                        onChange={(e) => {
+                          const userId = Number(u.id)
+                          if (e.target.checked) {
+                            setFormData(prev => ({ ...prev, responsaveis: [...prev.responsaveis, userId] }))
+                          } else {
+                            setFormData(prev => ({ ...prev, responsaveis: prev.responsaveis.filter(id => id !== userId) }))
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm">{u.nome}</span>
+                    </label>
                   ))}
-                </select>
+                </div>
               </div>
               <div>
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Grupo</label>
