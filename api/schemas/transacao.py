@@ -149,7 +149,7 @@ class TransacaoResponse(BaseModel):
     pessoa_nome: Optional[str]
     
     observacoes: Optional[str]
-    tags: List[str]
+    tags: Optional[List[str]] = []
     
     embedding: Optional[Any] = None
     

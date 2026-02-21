@@ -132,7 +132,7 @@ class TarefaResponse(BaseModel):
     
     ordem: int
     
-    tags: List[str]
+    tags: Optional[List[str]] = []
     embedding: Optional[Any] = None
     
     status: str = "ativa"
