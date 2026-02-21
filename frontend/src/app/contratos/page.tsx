@@ -226,7 +226,7 @@ export default function ContratosPage() {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground)]/40 z-10" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground)]/40 z-20 pointer-events-none" />
             <Input
               placeholder="Buscar contratos..."
               value={searchTerm}
@@ -362,7 +362,7 @@ export default function ContratosPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
           <div className="w-full max-w-lg rounded-xl bg-[var(--surface)] border border-[var(--border)] p-6 shadow-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {editingContrato ? 'Editar Contrato' : 'Novo Contrato'}

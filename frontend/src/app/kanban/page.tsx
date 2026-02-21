@@ -1180,7 +1180,7 @@ export default function KanbanPage() {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex flex-1 gap-4 overflow-x-auto pb-4">
+          <div className="flex flex-1 gap-4 pb-4 min-w-0">
             {colunas.map((coluna) => (
               <KanbanColumn
                 key={coluna.id}
