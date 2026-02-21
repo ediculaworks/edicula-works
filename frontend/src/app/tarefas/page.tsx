@@ -19,12 +19,16 @@ import {
   Move,
   Download,
   UserPlus,
+  Users,
   Play,
   MoreHorizontal,
   SlidersHorizontal,
   Filter,
   CheckCircle,
   Pause,
+  ChevronRight,
+  ChevronLeft,
+  Search,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTarefas } from "@/hooks/useTarefas"
@@ -557,7 +561,7 @@ export default function TarefasPage() {
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page === totalPages}
               >
-                <ChevronRightIcon className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>

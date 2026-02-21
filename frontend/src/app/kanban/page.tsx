@@ -1130,7 +1130,7 @@ export default function KanbanPage() {
                 key={coluna.id}
                 coluna={coluna}
                 tarefas={getTarefasPorColuna(coluna.id)}
-                onAddTask={(colunaId) => setShowAddTask(colunaId)}
+                onAddTask={handleAddTask}
                 onContextMenu={handleContextMenu}
                 onTaskClick={handleTaskClick}
                 page={pages[coluna.id]}
@@ -1186,7 +1186,9 @@ export default function KanbanPage() {
           />
         )}
       </AnimatePresence>
-    </DashboardLayout>
+
+      {/* Task Detail Modal */}
+      <AnimatePresence>
         {(selectedTask || isCreating) && (
           <TaskModal
             tarefa={selectedTask}

@@ -13,12 +13,13 @@ import {
   Play,
   Pause,
   CheckCircle,
+  Check,
   Archive,
   MoreVertical,
   Pencil,
   Trash2,
+  Edit,
   Calendar,
-  DollarSign,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
