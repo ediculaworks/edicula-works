@@ -55,17 +55,40 @@ export default function ChatPage() {
     setInput("")
     setLoading(true)
 
-    // Simular resposta (aqui você integraria com a API real)
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agente: agenteSelecionado,
+          mensagem: input,
+          historico: mensagens.slice(-10).map(m => ({ role: m.role, content: m.conteudo }))
+        })
+      })
+
+      if (!response.ok) throw new Error('Erro na API')
+
+      const data = await response.json()
+      
       const mensagemIA: Mensagem = {
         id: Date.now() + 1,
         role: "assistant",
-        conteudo: `Entendi sua mensagem sobre "${input}". Como posso ajudar você com isso?`,
+        conteudo: data.resposta,
         created_at: new Date().toISOString(),
       }
       setMensagens((prev) => [...prev, mensagemIA])
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error)
+      const mensagemErro: Mensagem = {
+        id: Date.now() + 1,
+        role: "assistant",
+        conteudo: "Desculpe, tive um problema ao processar sua mensagem. Tente novamente.",
+        created_at: new Date().toISOString(),
+      }
+      setMensagens((prev) => [...prev, mensagemErro])
+    } finally {
       setLoading(false)
-    }, 1500)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

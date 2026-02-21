@@ -1,6 +1,8 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { api, SystemStats, SystemHealth } from "@/lib/api"
 import { 
   Activity, 
   Server, 
@@ -9,10 +11,52 @@ import {
   Cpu,
   MemoryStick,
   Wifi,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react"
 
 export default function MonitorPage() {
+  const [stats, setStats] = useState<SystemStats | null>(null)
+  const [health, setHealth] = useState<SystemHealth | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [statsData, healthData] = await Promise.all([
+          api.getSystemStats(),
+          api.getSystemHealth()
+        ])
+        setStats(statsData)
+        setHealth(healthData)
+      } catch (err) {
+        setError("Erro ao carregar dados do sistema")
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+    const interval = setInterval(fetchData, 10000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  const cpuPercent = stats?.cpu.percent ?? 0
+  const memPercent = stats?.memory.percent ?? 0
+  const diskPercent = stats?.disk.percent ?? 0
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -28,11 +72,11 @@ export default function MonitorPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bento-item p-4">
             <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <Activity className="h-5 w-5 text-green-500" />
+              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${health?.status === 'healthy' ? 'bg-green-500/10' : health?.status === 'warning' ? 'bg-yellow-500/10' : 'bg-red-500/10'}`}>
+                <Activity className={`h-5 w-5 ${health?.status === 'healthy' ? 'text-green-500' : health?.status === 'warning' ? 'text-yellow-500' : 'text-red-500'}`} />
               </div>
               <div>
-                <p className="text-2xl font-bold">Online</p>
+                <p className="text-2xl font-bold capitalize">{health?.status || 'Unknown'}</p>
                 <p className="text-xs text-[var(--foreground)]/50">Status</p>
               </div>
             </div>
@@ -44,8 +88,8 @@ export default function MonitorPage() {
                 <Server className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">3</p>
-                <p className="text-xs text-[var(--foreground)]/50">Containers</p>
+                <p className="text-2xl font-bold">{stats?.cpu.count || 0}</p>
+                <p className="text-xs text-[var(--foreground)]/50">CPUs</p>
               </div>
             </div>
           </div>
@@ -56,7 +100,7 @@ export default function MonitorPage() {
                 <Database className="h-5 w-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">Supabase</p>
+                <p className="text-2xl font-bold">{health?.services?.database || 'N/A'}</p>
                 <p className="text-xs text-[var(--foreground)]/50">Banco</p>
               </div>
             </div>
@@ -68,8 +112,8 @@ export default function MonitorPage() {
                 <Clock className="h-5 w-5 text-yellow-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">99.9%</p>
-                <p className="text-xs text-[var(--foreground)]/50">Uptime</p>
+                <p className="text-2xl font-bold">{stats?.uptime?.boot_time ? 'Online' : 'N/A'}</p>
+                <p className="text-xs text-[var(--foreground)]/50">Sistema</p>
               </div>
             </div>
           </div>
@@ -85,10 +129,13 @@ export default function MonitorPage() {
                   <Cpu className="h-4 w-4" />
                   CPU
                 </span>
-                <span>45%</span>
+                <span>{cpuPercent.toFixed(1)}%</span>
               </div>
               <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                <div className="h-full w-[45%] bg-blue-500 rounded-full" />
+                <div 
+                  className={`h-full rounded-full ${cpuPercent > 80 ? 'bg-red-500' : cpuPercent > 60 ? 'bg-yellow-500' : 'bg-blue-500'}`} 
+                  style={{ width: `${cpuPercent}%` }} 
+                />
               </div>
             </div>
 
@@ -98,10 +145,13 @@ export default function MonitorPage() {
                   <MemoryStick className="h-4 w-4" />
                   Memória
                 </span>
-                <span>62%</span>
+                <span>{memPercent.toFixed(1)}%</span>
               </div>
               <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                <div className="h-full w-[62%] bg-purple-500 rounded-full" />
+                <div 
+                  className={`h-full rounded-full ${memPercent > 80 ? 'bg-red-500' : memPercent > 60 ? 'bg-yellow-500' : 'bg-purple-500'}`} 
+                  style={{ width: `${memPercent}%` }} 
+                />
               </div>
             </div>
 
@@ -111,23 +161,13 @@ export default function MonitorPage() {
                   <HardDrive className="h-4 w-4" />
                   Disco
                 </span>
-                <span>28%</span>
+                <span>{diskPercent.toFixed(1)}%</span>
               </div>
               <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                <div className="h-full w-[28%] bg-green-500 rounded-full" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="flex items-center gap-2">
-                  <Wifi className="h-4 w-4" />
-                  Rede
-                </span>
-                <span>12%</span>
-              </div>
-              <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-hidden">
-                <div className="h-full w-[12%] bg-yellow-500 rounded-full" />
+                <div 
+                  className={`h-full rounded-full ${diskPercent > 90 ? 'bg-red-500' : diskPercent > 70 ? 'bg-yellow-500' : 'bg-green-500'}`} 
+                  style={{ width: `${diskPercent}%` }} 
+                />
               </div>
             </div>
           </div>
@@ -139,23 +179,23 @@ export default function MonitorPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-[var(--surface-hover)] rounded-lg">
               <span>API</span>
-              <span className="flex items-center gap-2 text-green-500">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Online
+              <span className={`flex items-center gap-2 ${health?.services?.api === 'online' ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`h-2 w-2 rounded-full ${health?.services?.api === 'online' ? 'bg-green-500' : 'bg-red-500'}`} />
+                {health?.services?.api || 'unknown'}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-[var(--surface-hover)] rounded-lg">
               <span>Frontend</span>
-              <span className="flex items-center gap-2 text-green-500">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Online
+              <span className={`flex items-center gap-2 ${health?.services?.frontend === 'online' ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`h-2 w-2 rounded-full ${health?.services?.frontend === 'online' ? 'bg-green-500' : 'bg-red-500'}`} />
+                {health?.services?.frontend || 'unknown'}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 bg-[var(--surface-hover)] rounded-lg">
               <span>Supabase</span>
-              <span className="flex items-center gap-2 text-green-500">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Online
+              <span className={`flex items-center gap-2 ${health?.services?.database === 'online' ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`h-2 w-2 rounded-full ${health?.services?.database === 'online' ? 'bg-green-500' : 'bg-red-500'}`} />
+                {health?.services?.database || 'unknown'}
               </span>
             </div>
           </div>

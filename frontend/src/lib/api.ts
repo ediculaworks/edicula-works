@@ -337,9 +337,34 @@ export const api = {
     const response = await fetch(`${API_BASE}/conversas/${conversaId}/mensagens`)
     return handleResponse<Mensagem[]>(response)
   },
+
+  // System
+  async getSystemStats() {
+    const response = await fetch(`${API_BASE}/system`)
+    return handleResponse<SystemStats>(response)
+  },
+
+  async getSystemHealth() {
+    const response = await fetch(`${API_BASE}/system/health`)
+    return handleResponse<SystemHealth>(response)
+  },
 }
 
 // Types inline (importados do types/index)
 import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, ColunaKanban, Usuario, Tag } from '@/types'
 
 export type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, Usuario, Tag }
+
+export interface SystemStats {
+  cpu: { percent: number; count: number }
+  memory: { total: number; available: number; percent: number; used: number }
+  disk: { total: number; used: number; free: number; percent: number }
+  network: { bytes_sent: number; bytes_recv: number }
+  uptime: { boot_time: number }
+}
+
+export interface SystemHealth {
+  status: string
+  services: { api: string; database: string; frontend: string }
+  metrics: { cpu_percent: number; memory_percent: number; disk_percent: number }
+}

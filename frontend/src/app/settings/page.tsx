@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,11 +12,29 @@ import {
   Shield, 
   Palette,
   Globe,
-  Save
+  Save,
+  Loader2
 } from "lucide-react"
+
+interface TeamMember {
+  id: string
+  name: string
+  email: string
+  role: string
+}
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("perfil")
+  const [user, setUser] = useState<TeamMember | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const stored = localStorage.getItem("edicula_user")
+    if (stored) {
+      setUser(JSON.parse(stored))
+    }
+    setLoading(false)
+  }, [])
 
   const tabs = [
     { id: "perfil", label: "Perfil", icon: User },
@@ -25,6 +43,18 @@ export default function SettingsPage() {
     { id: "aparencia", label: "Aparência", icon: Palette },
     { id: "sistema", label: "Sistema", icon: Globe },
   ]
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  const userInitial = user?.name?.charAt(0).toUpperCase() || "U"
 
   return (
     <DashboardLayout>
@@ -64,7 +94,7 @@ export default function SettingsPage() {
                 
                 <div className="flex items-center gap-4">
                   <div className="h-20 w-20 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center text-2xl font-bold text-white">
-                    L
+                    {userInitial}
                   </div>
                   <Button variant="outline">Alterar foto</Button>
                 </div>
@@ -72,15 +102,15 @@ export default function SettingsPage() {
                 <div className="grid gap-4">
                   <div>
                     <Label>Nome</Label>
-                    <Input defaultValue="Lucas Drummond" />
+                    <Input defaultValue={user?.name || ""} />
                   </div>
                   <div>
                     <Label>Email</Label>
-                    <Input defaultValue="lucas.drummondpv@gmail.com" type="email" />
+                    <Input defaultValue={user?.email || ""} type="email" />
                   </div>
                   <div>
                     <Label>Cargo</Label>
-                    <Input defaultValue="Administrador" />
+                    <Input defaultValue={user?.role || ""} />
                   </div>
                 </div>
 
@@ -189,6 +219,11 @@ export default function SettingsPage() {
                   <div className="p-4 bg-[var(--surface-hover)] rounded-lg">
                     <p className="font-medium">Backend</p>
                     <p className="text-sm text-[var(--foreground)]/50">FastAPI + Python</p>
+                  </div>
+
+                  <div className="p-4 bg-[var(--surface-hover)] rounded-lg">
+                    <p className="font-medium">Usuário atual</p>
+                    <p className="text-sm text-[var(--foreground)]/50">{user?.name || "Não conectado"} ({user?.role || "N/A"})</p>
                   </div>
                 </div>
               </div>
