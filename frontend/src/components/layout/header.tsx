@@ -23,7 +23,7 @@ export function Header() {
       {/* Search - desktop */}
       <div className="hidden flex-1 md:block md:max-w-md">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground)]/40" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground)]/40 z-10 pointer-events-none" />
           <input
             type="text"
             placeholder="Buscar..."
