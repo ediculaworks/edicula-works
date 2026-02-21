@@ -23,6 +23,7 @@ export const api = {
     prioridade?: string
     responsavel?: number
     projeto_id?: number
+    sprint_id?: number
     status?: string
     skip?: number
     limit?: number
@@ -33,6 +34,7 @@ export const api = {
     if (params?.prioridade) searchParams.set('prioridade', params.prioridade)
     if (params?.responsavel) searchParams.set('responsavel', params.responsavel.toString())
     if (params?.projeto_id) searchParams.set('projeto_id', params.projeto_id.toString())
+    if (params?.sprint_id) searchParams.set('sprint_id', params.sprint_id.toString())
     if (params?.status) searchParams.set('status', params.status)
     if (params?.skip) searchParams.set('skip', params.skip.toString())
     if (params?.limit) searchParams.set('limit', params.limit.toString())

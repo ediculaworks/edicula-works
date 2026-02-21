@@ -6,11 +6,12 @@ interface UseTarefasOptions {
   empresaId?: number
   coluna?: string
   prioridade?: string
+  sprintId?: number
   status?: string
 }
 
 export function useTarefas(options: UseTarefasOptions = {}) {
-  const { empresaId = 1, coluna, prioridade, status } = options
+  const { empresaId = 1, coluna, prioridade, sprintId, status } = options
   
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,6 +25,7 @@ export function useTarefas(options: UseTarefasOptions = {}) {
         empresa_id: empresaId,
         coluna,
         prioridade,
+        sprint_id: sprintId,
         status,
       })
       setTarefas(data)
@@ -33,7 +35,7 @@ export function useTarefas(options: UseTarefasOptions = {}) {
     } finally {
       setLoading(false)
     }
-  }, [empresaId, coluna, prioridade, status])
+  }, [empresaId, coluna, prioridade, sprintId, status])
 
   useEffect(() => {
     fetchTarefas()

@@ -852,7 +852,8 @@ function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn 
 }
 
 export default function KanbanPage() {
-  const { tarefas: apiTarefas, loading, error, refetch, createTarefa, updateTarefa, deleteTarefa, moveTarefa, iniciarTarefa, pausarTarefa, finalizarTarefa, abandonarTarefa } = useTarefas({ empresaId: EMPRESA_ID })
+  const [selectedSprintId, setSelectedSprintId] = useState<number | undefined>(undefined)
+  const { tarefas: apiTarefas, loading, error, refetch, createTarefa, updateTarefa, deleteTarefa, moveTarefa, iniciarTarefa, pausarTarefa, finalizarTarefa, abandonarTarefa } = useTarefas({ empresaId: EMPRESA_ID, sprintId: selectedSprintId })
   const { usuarios, getUsuarioById } = useUsuarios({ empresaId: EMPRESA_ID })
   const { tags, getTagById } = useTags({ empresaId: EMPRESA_ID })
   const { grupos, getGrupoById } = useGrupos({ empresaId: EMPRESA_ID })
@@ -1118,6 +1119,24 @@ export default function KanbanPage() {
   return (
     <DashboardLayout>
       <div className="flex h-full flex-col">
+        {/* Sprint Selector */}
+        <div className="mb-4 flex items-center gap-3">
+          <label className="text-sm font-medium">Sprint:</label>
+          <select
+            value={selectedSprintId ?? ""}
+            onChange={(e) => setSelectedSprintId(e.target.value ? Number(e.target.value) : undefined)}
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm"
+          >
+            <option value="">Todos os sprints</option>
+            {sprints.map((sprint) => (
+              <option key={sprint.id} value={sprint.id}>{sprint.nome}</option>
+            ))}
+          </select>
+          {sprints.length === 0 && (
+            <span className="text-xs text-[var(--foreground)]/50">Nenhum sprint cadastrado</span>
+          )}
+        </div>
+
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
