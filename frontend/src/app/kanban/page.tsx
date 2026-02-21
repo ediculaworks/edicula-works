@@ -490,6 +490,10 @@ interface TaskModalProps {
 
 function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags }: TaskModalProps) {
   const [editModeState, setEditModeState] = useState(isCreating || editMode)
+  const [selectedResponsaveis, setSelectedResponsaveis] = useState<number[]>(() => {
+    if (isCreating) return []
+    return tarefa?.responsaveis || []
+  })
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
       return {
@@ -523,6 +527,7 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
   const handleSave = () => {
     onSave({
       ...formData,
+      responsaveis: selectedResponsaveis,
       updated_at: new Date().toISOString()
     })
   }
@@ -642,24 +647,27 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
               <div>
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
                 <div className="space-y-2 border border-[var(--border)] rounded-lg p-2 max-h-32 overflow-y-auto">
-                  {usuarios.map(u => (
-                    <label key={u.id} className="flex items-center gap-2 cursor-pointer hover:bg-[var(--surface-hover)] p-1 rounded">
-                      <input
-                        type="checkbox"
-                        checked={formData.responsaveis.includes(Number(u.id))}
-                        onChange={(e) => {
-                          const userId = Number(u.id)
-                          if (e.target.checked) {
-                            setFormData(prev => ({ ...prev, responsaveis: [...prev.responsaveis, userId] }))
-                          } else {
-                            setFormData(prev => ({ ...prev, responsaveis: prev.responsaveis.filter(id => id !== userId) }))
-                          }
-                        }}
-                        className="rounded"
-                      />
-                      <span className="text-sm">{u.nome}</span>
-                    </label>
-                  ))}
+                  {usuarios.map(u => {
+                    const userId = Number(u.id)
+                    const isChecked = selectedResponsaveis.includes(userId)
+                    return (
+                      <label key={u.id} className="flex items-center gap-2 cursor-pointer hover:bg-[var(--surface-hover)] p-1 rounded">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedResponsaveis(prev => [...prev, userId])
+                            } else {
+                              setSelectedResponsaveis(prev => prev.filter(id => id !== userId))
+                            }
+                          }}
+                          className="rounded"
+                        />
+                        <span className="text-sm">{u.nome}</span>
+                      </label>
+                    )
+                  })}
                 </div>
               </div>
               <div>
