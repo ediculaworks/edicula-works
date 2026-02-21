@@ -1,13 +1,7 @@
-from supabase import create_client, Client
+from supabase import Client
 from api.schemas.projeto import ProjetoCreate, ProjetoUpdate, ProjetoResponse
 from typing import List, Optional
-import os
-
-
-def get_db() -> Client:
-    supabase_url = os.getenv("SUPABASE_URL")
-    supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
-    return create_client(supabase_url, supabase_key)
+from api.database import get_db
 
 
 async def listar_projetos(
