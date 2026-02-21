@@ -273,7 +273,7 @@ function SortableTask({ tarefa, onContextMenu, onClick, getUsuarioById, getGrupo
   }
 
   const prioridade = getPrioridadeConfig(tarefa.prioridade)
-  const responsaveis = tarefa.responsaveis.map(id => getUsuarioById(id)).filter(Boolean)
+  const responsaveis = tarefa.responsaveis.map(id => getUsuarioById(String(id))).filter(Boolean)
   const grupo = tarefa.grupo_id ? getGrupoById(tarefa.grupo_id) : null
   const status = getStatusConfig(tarefa.status)
   
@@ -358,21 +358,15 @@ function SortableTask({ tarefa, onContextMenu, onClick, getUsuarioById, getGrupo
               </div>
             )}
             {responsaveis.length > 0 && (
-              <div className="flex -space-x-1">
-                {responsaveis.slice(0, 2).map((usuario) => (
-                  <div
+              <div className="flex flex-wrap gap-1 mt-1">
+                {responsaveis.map((usuario) => (
+                  <span
                     key={usuario!.id}
-                    className="h-5 w-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-[10px] text-white font-medium ring-1 ring-[var(--surface)]"
-                    title={usuario!.nome}
+                    className="text-xs px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]"
                   >
-                    {usuario!.nome.charAt(0)}
-                  </div>
+                    {usuario!.nome}
+                  </span>
                 ))}
-                {responsaveis.length > 2 && (
-                  <div className="h-5 w-5 rounded-full bg-[var(--surface-hover)] flex items-center justify-center text-[10px] text-[var(--foreground)] ring-1 ring-[var(--surface)]">
-                    +{responsaveis.length - 2}
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -522,7 +516,7 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
 
   const prioridade = getPrioridadeConfig(formData.prioridade)
   const status = getStatusConfig(formData.status)
-  const responsaveis = formData.responsaveis.map(id => usuarios.find(u => u.id === id)).filter(Boolean)
+  const responsaveis = formData.responsaveis.map(id => usuarios.find(u => u.id === String(id))).filter(Boolean)
   const grupo = formData.grupo_id ? grupos.find(g => g.id === formData.grupo_id) : null
   const sprint = formData.sprint_id ? sprints.find(s => s.id === formData.sprint_id) : undefined
 
@@ -649,9 +643,9 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
                 <select
                   multiple
-                  value={formData.responsaveis}
+                  value={formData.responsaveis.map(String)}
                   onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => option.value)
+                    const values = Array.from(e.target.selectedOptions, option => Number(option.value))
                     setFormData(prev => ({ ...prev, responsaveis: values }))
                   }}
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm h-24"

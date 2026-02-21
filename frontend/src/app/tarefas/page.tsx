@@ -74,6 +74,8 @@ const colunas: { id: ColunaKanban; titulo: string; cor: string }[] = [
 interface Filtros {
   prioridade?: Prioridade
   status?: StatusTarefa
+  sprintId?: number
+  membroId?: number
 }
 
 interface ContextMenuProps {
@@ -251,6 +253,15 @@ export default function TarefasPage() {
     if (filtros.status && tarefa.status !== filtros.status) {
       return false
     }
+    if (filtros.sprintId && tarefa.sprint_id !== filtros.sprintId) {
+      return false
+    }
+    if (filtros.membroId) {
+      const isResponsavel = tarefa.responsaveis?.includes(filtros.membroId)
+      if (!isResponsavel) {
+        return false
+      }
+    }
     return true
   })
 
@@ -396,7 +407,41 @@ export default function TarefasPage() {
                   ))}
                 </select>
 
-                {(filtros.prioridade || filtros.status) && (
+                <select
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] px-3 py-2 text-sm"
+                  value={filtros.sprintId ?? ""}
+                  onChange={(e) => {
+                    setFiltros((prev) => ({ 
+                      ...prev, 
+                      sprintId: e.target.value ? Number(e.target.value) : undefined 
+                    }))
+                    setPage(1)
+                  }}
+                >
+                  <option value="">Sprint</option>
+                  {sprints.map((s) => (
+                    <option key={s.id} value={s.id}>{s.nome}</option>
+                  ))}
+                </select>
+
+                <select
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] px-3 py-2 text-sm"
+                  value={filtros.membroId ?? ""}
+                  onChange={(e) => {
+                    setFiltros((prev) => ({ 
+                      ...prev, 
+                      membroId: e.target.value ? Number(e.target.value) : undefined 
+                    }))
+                    setPage(1)
+                  }}
+                >
+                  <option value="">Membro</option>
+                  {usuarios.map((u) => (
+                    <option key={u.id} value={u.id}>{u.nome}</option>
+                  ))}
+                </select>
+
+                {(filtros.prioridade || filtros.status || filtros.sprintId || filtros.membroId) && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -693,7 +738,7 @@ function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCr
 
   const prioridade = getPrioridadeConfig(formData.prioridade)
   const status = getStatusConfig(formData.status)
-  const responsaveis = formData.responsaveis.map(id => usuarios.find(u => u.id === id)).filter(Boolean)
+  const responsaveis = formData.responsaveis.map(id => usuarios.find(u => u.id === String(id))).filter(Boolean)
   const grupo = formData.grupo_id ? grupos.find(g => g.id === formData.grupo_id) : null
   const sprint = formData.sprint_id ? sprints.find(s => s.id === formData.sprint_id) : null
 
@@ -820,9 +865,9 @@ function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCr
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
                 <select
                   multiple
-                  value={formData.responsaveis}
+                  value={formData.responsaveis.map(String)}
                   onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => option.value)
+                    const values = Array.from(e.target.selectedOptions, option => Number(option.value))
                     setFormData(prev => ({ ...prev, responsaveis: values }))
                   }}
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm h-24"
