@@ -41,7 +41,7 @@ class TarefaCreate(BaseModel):
     
     prazo: Optional[date] = None
     
-    responsaveis: Optional[List[int]] = []
+    responsaveis: Optional[List[str]] = []
     cliente_nome: Optional[str] = None
     
     tarefa_pai_id: Optional[int] = None
@@ -53,7 +53,7 @@ class TarefaCreate(BaseModel):
     status: Status = Status.ativa
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
-    observadores: Optional[List[int]] = []
+    observadores: Optional[List[str]] = []
     previsao_entrega: Optional[date] = None
     estimativa_horas_prevista: Optional[float] = None
     data_inicio: Optional[datetime] = None
@@ -77,7 +77,7 @@ class TarefaUpdate(BaseModel):
     prazo: Optional[date] = None
     data_conclusao: Optional[datetime] = None
     
-    responsaveis: Optional[List[int]] = None
+    responsaveis: Optional[List[str]] = None
     cliente_nome: Optional[str] = None
     
     tarefa_pai_id: Optional[int] = None
@@ -85,14 +85,14 @@ class TarefaUpdate(BaseModel):
     tags: Optional[List[str]] = None
     ordem: Optional[int] = None
     
-    tempo_gasto_minutas: Optional[int] = None
+    tempo_gasto_minutos: Optional[int] = None
     relatorio_horas: Optional[float] = None
     relatorio_custo: Optional[float] = None
     
     status: Optional[str] = None
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
-    observadores: Optional[List[int]] = None
+    observadores: Optional[List[str]] = None
     previsao_entrega: Optional[date] = None
     estimativa_horas_prevista: Optional[float] = None
     data_inicio: Optional[datetime] = None
@@ -123,7 +123,7 @@ class TarefaResponse(BaseModel):
     data_conclusao: Optional[datetime]
     tempo_gasto_minutos: int
     
-    responsaveis: List[int]
+    responsaveis: List[str]
     created_by: Optional[int]
     cliente_nome: Optional[str]
     
@@ -138,7 +138,7 @@ class TarefaResponse(BaseModel):
     status: str = "ativa"
     sprint_id: Optional[int] = None
     grupo_id: Optional[int] = None
-    observadores: List[int] = []
+    observadores: List[str] = []
     previsao_entrega: Optional[date] = None
     estimativa_horas_prevista: Optional[float] = None
     data_inicio: Optional[datetime] = None

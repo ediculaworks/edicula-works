@@ -7,6 +7,22 @@ class ApiError extends Error {
   }
 }
 
+function removeUndefined(obj: any): any {
+  if (obj === undefined) return null
+  if (obj === null) return null
+  if (Array.isArray(obj)) {
+    return obj.map(item => removeUndefined(item))
+  }
+  if (typeof obj === 'object') {
+    const result: any = {}
+    for (const key in obj) {
+      result[key] = removeUndefined(obj[key])
+    }
+    return result
+  }
+  return obj
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Erro desconhecido' }))
@@ -50,19 +66,21 @@ export const api = {
   },
 
   async createTarefa(data: Partial<Tarefa>) {
+    const cleanData = removeUndefined(data)
     const response = await fetch(`${API_BASE}/tarefas`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(cleanData),
     })
     return handleResponse<Tarefa>(response)
   },
 
   async updateTarefa(id: number, data: Partial<Tarefa>) {
+    const cleanData = removeUndefined(data)
     const response = await fetch(`${API_BASE}/tarefas/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(cleanData),
     })
     return handleResponse<Tarefa>(response)
   },
