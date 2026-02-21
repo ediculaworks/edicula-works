@@ -868,26 +868,29 @@ function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCr
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
-                <div className="space-y-2 border border-[var(--border)] rounded-lg p-2 max-h-32 overflow-y-auto">
+                <div className="flex flex-wrap gap-2">
                   {usuarios.map(u => {
                     const userId = Number(u.id)
-                    const isChecked = selectedResponsaveis.includes(userId)
+                    const isSelected = selectedResponsaveis.includes(userId)
                     return (
-                      <label key={u.id} className="flex items-center gap-2 cursor-pointer hover:bg-[var(--surface-hover)] p-1 rounded">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedResponsaveis(prev => [...prev, userId])
-                            } else {
-                              setSelectedResponsaveis(prev => prev.filter(id => id !== userId))
-                            }
-                          }}
-                          className="rounded"
-                        />
-                        <span className="text-sm">{u.nome}</span>
-                      </label>
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedResponsaveis(prev => prev.filter(id => id !== userId))
+                          } else {
+                            setSelectedResponsaveis(prev => [...prev, userId])
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                          isSelected 
+                            ? "bg-[var(--primary)] text-white" 
+                            : "bg-[var(--surface-hover)] text-[var(--foreground)] hover:bg-[var(--border)]"
+                        }`}
+                      >
+                        {u.nome}
+                      </button>
                     )
                   })}
                 </div>
