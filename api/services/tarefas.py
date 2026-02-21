@@ -55,11 +55,11 @@ async def criar_tarefa(tarefa: TarefaCreate) -> Dict[str, Any]:
     
     data = tarefa.model_dump()
     
+    # Remove campos que não existem na tabela
+    data.pop("tags", None)
     data["responsaveis"] = data.get("responsaveis") or []
-    data["tags"] = data.get("tags") or []
-    data["embedding"] = None
     
-    print(f"[DEBUG] Criando tarefa: {data}")
+    print(f"[DEBUG] Criando tarefa com dados: {data}")
     
     try:
         result = db.table("tarefas").insert(data).execute()

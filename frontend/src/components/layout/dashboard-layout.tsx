@@ -9,20 +9,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed } = useUIStore()
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)]">
       <Sidebar />
       <div
         className={cn(
-          "flex h-full flex-col transition-all duration-200",
+          "transition-all duration-200",
           "md:ml-16",
           !sidebarCollapsed && "md:ml-64"
         )}
       >
         <Header />
-        <main className="flex-1 overflow-hidden p-4 md:p-6">
-          <div className="h-full overflow-auto pb-4">
-            {children}
-          </div>
+        <main className="p-4 md:p-6">
+          {children}
         </main>
       </div>
     </div>
