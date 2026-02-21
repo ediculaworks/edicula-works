@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton, CardSkeleton, ListItemSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
   Wallet, 
   Plus, 
@@ -14,7 +15,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Calendar,
-  Filter
+  Filter,
+  Receipt
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -187,12 +189,26 @@ export default function FinanceiroPage() {
 
         {/* Transactions List */}
         {loading ? (
-          <div className="text-center py-12 text-[var(--foreground)]/50">
-            Carregando...
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <ListItemSkeleton key={i} />
+            ))}
           </div>
         ) : filteredTransacoes.length === 0 ? (
-          <div className="text-center py-12 text-[var(--foreground)]/50">
-            Nenhuma transação encontrada
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="h-20 w-20 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-4">
+              <Receipt className="h-10 w-10 text-[var(--foreground)]/30" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Nenhuma transação encontrada</h3>
+            <p className="text-sm text-[var(--foreground)]/50 mb-4">
+              {searchTerm || filterTipo || filterStatus ? "Tente ajustar os filtros" : "Comece registrando sua primeira transação"}
+            </p>
+            {!searchTerm && !filterTipo && !filterStatus && (
+              <Button className="glow-button">
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Transação
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">

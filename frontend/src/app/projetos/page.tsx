@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton, CardSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
   FolderKanban, 
   Plus, 
@@ -13,7 +14,8 @@ import {
   Trash2,
   Eye,
   Calendar,
-  User
+  User,
+  FolderOpen
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -143,12 +145,26 @@ export default function ProjetosPage() {
 
         {/* Projects Grid */}
         {loading ? (
-          <div className="text-center py-12 text-[var(--foreground)]/50">
-            Carregando...
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
         ) : filteredProjetos.length === 0 ? (
-          <div className="text-center py-12 text-[var(--foreground)]/50">
-            Nenhum projeto encontrado
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="h-20 w-20 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-4">
+              <FolderOpen className="h-10 w-10 text-[var(--foreground)]/30" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Nenhum projeto encontrado</h3>
+            <p className="text-sm text-[var(--foreground)]/50 mb-4">
+              {searchTerm ? "Tente buscar por outro termo" : "Comece criando seu primeiro projeto"}
+            </p>
+            {!searchTerm && (
+              <Button className="glow-button">
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Projeto
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

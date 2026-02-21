@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { Button } from "@/components/ui/button"
 import { api, SystemStats, SystemHealth } from "@/lib/api"
+import { Skeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
   Activity, 
   Server, 
@@ -12,7 +14,8 @@ import {
   MemoryStick,
   Wifi,
   Clock,
-  Loader2
+  AlertCircle,
+  CheckCircle2
 } from "lucide-react"
 
 export default function MonitorPage() {
@@ -46,8 +49,49 @@ export default function MonitorPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-96">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
+        <div className="space-y-6">
+          <div>
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <StatsSkeleton />
+          <div className="bento-item p-6">
+            <Skeleton className="h-6 w-24 mb-4" />
+            <div className="space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-8" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold">Monitor</h1>
+            <p className="text-sm text-[var(--foreground)]/50">
+              Monitoramento do sistema
+            </p>
+          </div>
+          <div className="bento-item p-8 flex flex-col items-center justify-center text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Erro ao carregar dados</h3>
+            <p className="text-sm text-[var(--foreground)]/50 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} className="glow-button">
+              Tentar novamente
+            </Button>
+          </div>
         </div>
       </DashboardLayout>
     )

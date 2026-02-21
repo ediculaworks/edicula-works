@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton, CardSkeleton, ListItemSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { 
   FileText, 
   Plus, 
@@ -12,7 +13,8 @@ import {
   Calendar,
   DollarSign,
   User,
-  Clock
+  Clock,
+  FileSignature
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -152,12 +154,26 @@ export default function ContratosPage() {
 
         {/* Contracts List */}
         {loading ? (
-          <div className="text-center py-12 text-[var(--foreground)]/50">
-            Carregando...
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <ListItemSkeleton key={i} />
+            ))}
           </div>
         ) : filteredContratos.length === 0 ? (
-          <div className="text-center py-12 text-[var(--foreground)]/50">
-            Nenhum contrato encontrado
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="h-20 w-20 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-4">
+              <FileSignature className="h-10 w-10 text-[var(--foreground)]/30" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Nenhum contrato encontrado</h3>
+            <p className="text-sm text-[var(--foreground)]/50 mb-4">
+              {searchTerm || filterStatus ? "Tente ajustar os filtros" : "Comece criando seu primeiro contrato"}
+            </p>
+            {!searchTerm && !filterStatus && (
+              <Button className="glow-button">
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Contrato
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">

@@ -14,7 +14,7 @@ import {
   Calendar,
   Activity,
   Settings,
-  MessageSquare,
+  Bot,
   X,
   ChevronLeft,
   ChevronRight,
@@ -22,7 +22,7 @@ import {
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/chat", label: "Chat", icon: MessageSquare },
+  { href: "/agentes", label: "Agentes", icon: Bot },
   { href: "/kanban", label: "Kanban", icon: Kanban },
   { href: "/tarefas", label: "Tarefas", icon: ListTodo },
   { href: "/projetos", label: "Projetos", icon: FolderKanban },
