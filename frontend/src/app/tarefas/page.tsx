@@ -712,14 +712,14 @@ interface TarefaModalProps {
 
 function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCreating = false, editMode = false, usuarios, grupos, sprints, tags }: TarefaModalProps) {
   const [editModeState, setEditModeState] = useState(isCreating || editMode)
-  const [selectedResponsaveis, setSelectedResponsaveis] = useState<number[]>(() => {
+  const [selectedResponsaveis, setSelectedResponsaveis] = useState<string[]>(() => {
     if (isCreating) return []
-    return tarefa?.responsaveis || []
+    return tarefa?.responsaveis?.map(String) || []
   })
   
   useEffect(() => {
     if (tarefa && !isCreating) {
-      setSelectedResponsaveis(tarefa.responsaveis || [])
+      setSelectedResponsaveis(tarefa.responsaveis?.map(String) || [])
     } else if (isCreating) {
       setSelectedResponsaveis([])
     }
@@ -758,7 +758,7 @@ function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCr
   const handleSave = () => {
     onSave({
       ...formData,
-      responsaveis: selectedResponsaveis,
+      responsaveis: selectedResponsaveis.map(Number),
       updated_at: new Date().toISOString()
     })
   }
@@ -879,7 +879,7 @@ function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCr
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Responsáveis</label>
                 <div className="flex flex-wrap gap-2">
                   {usuarios.map(u => {
-                    const userId = Number(u.id)
+                    const userId = u.id
                     const isSelected = selectedResponsaveis.includes(userId)
                     return (
                       <button
