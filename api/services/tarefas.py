@@ -19,27 +19,31 @@ async def listar_tarefas(
 ) -> List[Dict[str, Any]]:
     db = get_db()
     
-    query = db.table("tarefas").select("*").eq("empresa_id", empresa_id)
-    
-    if coluna:
-        query = query.eq("coluna", coluna)
-    if prioridade:
-        query = query.eq("prioridade", prioridade)
-    if responsavel:
-        query = query.contains("responsaveis", [responsavel])
-    if projeto_id:
-        query = query.eq("projeto_id", projeto_id)
-    if sprint_id:
-        query = query.eq("sprint_id", sprint_id)
-    if grupo_id:
-        query = query.eq("grupo_id", grupo_id)
-    if status:
-        query = query.eq("status", status)
-    
-    query = query.order("created_at", desc=True).range(skip, skip + limit - 1)
-    
-    result = query.execute()
-    return result.data or []
+    try:
+        query = db.table("tarefas").select("*").eq("empresa_id", empresa_id)
+        
+        if coluna:
+            query = query.eq("coluna", coluna)
+        if prioridade:
+            query = query.eq("prioridade", prioridade)
+        if responsavel:
+            query = query.contains("responsaveis", [responsavel])
+        if projeto_id:
+            query = query.eq("projeto_id", projeto_id)
+        if sprint_id:
+            query = query.eq("sprint_id", sprint_id)
+        if grupo_id:
+            query = query.eq("grupo_id", grupo_id)
+        if status:
+            query = query.eq("status", status)
+        
+        query = query.order("created_at", desc=True).range(skip, skip + limit - 1)
+        
+        result = query.execute()
+        return result.data or []
+    except Exception as e:
+        print(f"[ERROR] Erro ao listar tarefas: {e}")
+        raise
 
 
 async def buscar_tarefa(tarefa_id: int, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
