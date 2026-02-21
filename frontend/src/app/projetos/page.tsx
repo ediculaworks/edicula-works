@@ -48,7 +48,7 @@ const statusColors = {
   concluido: "bg-blue-500/10 text-blue-500"
 }
 
-const statusIcons = {
+const statusIcons: Record<string, any> = {
   ativo: Play,
   pausado: Pause,
   arquivado: Archive,
@@ -251,7 +251,7 @@ export default function ProjetosPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProjetos.map((projeto) => {
-              const StatusIcon = statusIcons[projeto.status]
+              const StatusIcon = statusIcons[projeto.status] || Play
               return (
                 <div
                   key={projeto.id}
