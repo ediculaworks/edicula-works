@@ -642,7 +642,7 @@ interface TarefaModalProps {
 }
 
 function TarefaModal({ tarefa, onClose, onSave, isCreating = false, editMode = false, usuarios, grupos, sprints, tags }: TarefaModalProps) {
-  const [editModeState, setEditModeState] = useState(!isCreating && editMode)
+  const [editModeState, setEditModeState] = useState(isCreating || editMode)
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
       return {

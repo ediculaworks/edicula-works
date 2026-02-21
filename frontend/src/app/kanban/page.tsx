@@ -492,7 +492,7 @@ interface TaskModalProps {
 }
 
 function TaskModal({ tarefa, onClose, onSave, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags }: TaskModalProps) {
-  const [editModeState, setEditModeState] = useState(!isCreating && editMode)
+  const [editModeState, setEditModeState] = useState(isCreating || editMode)
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
       return {
