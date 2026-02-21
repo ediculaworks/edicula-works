@@ -494,6 +494,15 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
     if (isCreating) return []
     return tarefa?.responsaveis || []
   })
+  
+  useEffect(() => {
+    if (tarefa && !isCreating) {
+      setSelectedResponsaveis(tarefa.responsaveis || [])
+    } else if (isCreating) {
+      setSelectedResponsaveis([])
+    }
+  }, [tarefa, isCreating])
+  
   const [formData, setFormData] = useState<Tarefa>(() => {
     if (isCreating) {
       return {
