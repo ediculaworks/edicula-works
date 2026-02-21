@@ -147,10 +147,10 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4">
+      <div className="space-y-4 h-full overflow-hidden">
         
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -175,18 +175,18 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
           
           {/* Main Content - Charts */}
-          <div className="lg:col-span-8 space-y-4">
+          <div className="lg:col-span-8 space-y-4 overflow-hidden">
             
             {/* Charts Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Tarefas por Status */}
               <motion.div variants={sectionVariants} className="bento-item p-4">
-                <h3 className="text-sm font-semibold mb-4">Tarefas por Status</h3>
+                <h3 className="text-sm font-semibold mb-2">Tarefas por Status</h3>
                 {tarefasPorStatus.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={180}>
+                  <ResponsiveContainer width="100%" height={140}>
                     <PieChart>
                       <Pie
                         data={tarefasPorStatus}
@@ -227,9 +227,9 @@ export default function DashboardPage() {
 
               {/* Projetos por Status */}
               <motion.div variants={sectionVariants} className="bento-item p-4">
-                <h3 className="text-sm font-semibold mb-4">Projetos</h3>
+                <h3 className="text-sm font-semibold mb-2">Projetos</h3>
                 {projetosPorStatus.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={180}>
+                  <ResponsiveContainer width="100%" height={140}>
                     <BarChart data={projetosPorStatus} layout="vertical">
                       <XAxis type="number" hide />
                       <YAxis type="category" dataKey="name" width={60} tick={{ fontSize: 12 }} />
@@ -257,7 +257,7 @@ export default function DashboardPage() {
 
             {/* Tarefas Recentes */}
             <motion.div variants={sectionVariants} className="bento-item p-4">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold flex items-center gap-2">
                   <Target className="h-4 w-4 text-[var(--primary)]" />
                   Tarefas Recentes
@@ -267,11 +267,11 @@ export default function DashboardPage() {
                 </a>
               </div>
               {tarefas.length === 0 ? (
-                <div className="text-center py-8 text-sm text-[var(--foreground)]/50">
+                <div className="text-center py-4 text-sm text-[var(--foreground)]/50">
                   Nenhuma tarefa encontrada
                 </div>
               ) : (
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {tarefas.slice(0, 8).map((task) => (
                     <div 
                       key={task.id}
@@ -303,15 +303,15 @@ export default function DashboardPage() {
             </motion.div>
           </div>
 
-          {/* Sidebar */}
-          <div className="grid grid-cols-1 gap-4">
+          {/* Sidebar - 2 columns */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {/* Resumo Financeiro */}
-            <motion.div variants={sectionVariants} className="bento-item p-4">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <motion.div variants={sectionVariants} className="bento-item p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <Wallet className="h-4 w-4 text-green-500" />
                 Resumo Financeiro
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[var(--foreground)]/70">Receitas</span>
                   <span className="text-sm font-medium text-green-500">{formatCurrency(receitas)}</span>
@@ -329,24 +329,24 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <a href="/financeiro" className="block mt-4 text-center text-xs text-[var(--primary)] hover:underline">
+              <a href="/financeiro" className="block mt-2 text-center text-xs text-[var(--primary)] hover:underline">
                 Ver detalhes
               </a>
             </motion.div>
 
             {/* Projetos Ativos */}
-            <motion.div variants={sectionVariants} className="bento-item p-4">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <motion.div variants={sectionVariants} className="bento-item p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <FolderKanban className="h-4 w-4 text-purple-500" />
                 Projetos Ativos
               </h3>
               {projetosAtivos === 0 ? (
-                <div className="text-center py-4 text-sm text-[var(--foreground)]/50">
+                <div className="text-center py-2 text-sm text-[var(--foreground)]/50">
                   Nenhum projeto ativo
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {projetos.filter(p => p.status === 'ativo').slice(0, 5).map((proj) => (
+                  {projetos.filter(p => p.status === 'ativo').slice(0, 4).map((proj) => (
                     <div 
                       key={proj.id}
                       className="flex items-center justify-between rounded-lg bg-[var(--surface-hover)] p-2"
@@ -356,36 +356,36 @@ export default function DashboardPage() {
                           className="h-2 w-2 rounded-full" 
                           style={{ backgroundColor: proj.cor || '#3b82f6' }}
                         />
-                        <span className="text-sm truncate max-w-[120px]">{proj.nome}</span>
+                        <span className="text-sm truncate max-w-[100px]">{proj.nome}</span>
                       </div>
                       <span className="text-xs text-[var(--foreground)]/50">{proj.progresso || 0}%</span>
                     </div>
                   ))}
                 </div>
               )}
-              <a href="/projetos" className="block mt-4 text-center text-xs text-[var(--primary)] hover:underline">
-                Ver todos os projetos
+              <a href="/projetos" className="block mt-2 text-center text-xs text-[var(--primary)] hover:underline">
+                Ver todos
               </a>
             </motion.div>
 
             {/* Membros */}
-            <motion.div variants={sectionVariants} className="bento-item p-4">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <motion.div variants={sectionVariants} className="bento-item p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <Users className="h-4 w-4 text-blue-500" />
                 Equipe
               </h3>
               {usuarios.length === 0 ? (
-                <div className="text-center py-4 text-sm text-[var(--foreground)]/50">
+                <div className="text-center py-2 text-sm text-[var(--foreground)]/50">
                   Nenhum membro
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-2">
-                  {usuarios.slice(0, 6).map((user) => (
+                <div className="flex flex-wrap gap-1">
+                  {usuarios.slice(0, 4).map((user) => (
                     <div 
                       key={user.id}
-                      className="flex items-center gap-2 rounded-full bg-[var(--surface-hover)] px-3 py-1"
+                      className="flex items-center gap-1 rounded-full bg-[var(--surface-hover)] px-2 py-1"
                     >
-                      <div className="h-6 w-6 rounded-full bg-[var(--primary)] flex items-center justify-center text-xs text-white">
+                      <div className="h-5 w-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-[10px] text-white">
                         {user.nome?.charAt(0) || '?'}
                       </div>
                       <span className="text-xs">{user.nome?.split(' ')[0]}</span>

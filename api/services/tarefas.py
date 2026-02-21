@@ -59,9 +59,15 @@ async def criar_tarefa(tarefa: TarefaCreate) -> Dict[str, Any]:
     data["tags"] = data.get("tags") or []
     data["embedding"] = None
     
-    result = db.table("tarefas").insert(data).execute()
+    print(f"[DEBUG] Criando tarefa: {data}")
     
-    return result.data[0] if result.data else None
+    try:
+        result = db.table("tarefas").insert(data).execute()
+        print(f"[DEBUG] Resultado: {result.data}")
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[ERROR] Erro ao criar tarefa: {e}")
+        raise
 
 
 async def atualizar_tarefa(tarefa_id: int, tarefa: TarefaUpdate, empresa_id: int = 1) -> Optional[Dict[str, Any]]:
