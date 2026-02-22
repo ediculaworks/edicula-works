@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton, CardSkeleton, ListItemSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
+import { useProjetos } from "@/hooks/useProjetos"
 import { 
   Plus, 
   Receipt, 
@@ -50,6 +51,7 @@ interface Transacao {
   data_pagamento?: string
   status: 'pendente' | 'pago' | 'cancelado' | 'estornado'
   conta_bancaria_id?: number
+  projeto_id?: number
   created_at: string
 }
 
@@ -67,6 +69,7 @@ export default function FinanceiroPage() {
   const [filterStatus, setFilterStatus] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingTransacao, setEditingTransacao] = useState<Transacao | null>(null)
+  const { projetos } = useProjetos({ empresaId: EMPRESA_ID })
 
   useEffect(() => {
     fetchTransacoes()
@@ -463,6 +466,19 @@ export default function FinanceiroPage() {
                     <option value="cancelado">Cancelado</option>
                   </select>
                 </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Projeto</label>
+                <select 
+                  name="projeto_id" 
+                  defaultValue={editingTransacao?.projeto_id || ''}
+                  className="w-full px-4 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]"
+                >
+                  <option value="">Nenhum projeto</option>
+                  {projetos.map(p => (
+                    <option key={p.id} value={p.id}>{p.nome}</option>
+                  ))}
+                </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

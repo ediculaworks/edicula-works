@@ -88,9 +88,6 @@ async def upload_arquivo(
             {"content-type": arquivo.content_type}
         )
         
-        if response.error:
-            raise Exception(response.error.message)
-        
         public_url = db.storage.from_("contratos").get_public_url(file_name)
         
         await contrato_service.atualizar_contrato(contrato_id, {"arquivo_url": public_url}, empresa_id)

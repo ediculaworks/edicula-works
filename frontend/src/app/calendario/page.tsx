@@ -58,7 +58,7 @@ export default function CalendarioPage() {
   const fetchTarefas = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tarefas?empresa_id=${EMPRESA_ID}`)
+      const response = await fetch(`/api/tarefas?empresa_id=${EMPRESA_ID}`)
       if (response.ok) {
         const data = await response.json()
         setTarefas(data)
