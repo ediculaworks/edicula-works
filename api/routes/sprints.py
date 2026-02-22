@@ -61,10 +61,16 @@ async def iniciar_sprint(sprint_id: int):
 
 
 @router.post("/{sprint_id}/concluir", response_model=SprintResponse)
-async def concluir_sprint(sprint_id: int):
+async def concluir_sprint(sprint_id: int, mover_tarefas: bool = True):
     from datetime import date
     sprint = SprintService.update(sprint_id, {"status": "concluida", "data_conclusao": date.today()})
     if not sprint:
         raise HTTPException(status_code=404, detail="Sprint não encontrada")
     SprintService.update_pontos(sprint_id)
+    
+    if mover_tarefas:
+        next_sprint = SprintService.move_incomplete_to_next(sprint_id)
+        if next_sprint:
+            print(f"Tarefas movidas para a próxima sprint: {next_sprint['nome']}")
+    
     return sprint

@@ -59,3 +59,33 @@ class SprintService:
         tarefas = TarefaService.list(empresa_id=1, sprint_id=sprint_id, coluna="done")
         pontos = sum(t.get("estimativa_pontos", 0) or 0 for t in tarefas)
         db.table("sprints").update({"pontos_concluidos": pontos}).eq("id", sprint_id).execute()
+    
+    @staticmethod
+    def move_incomplete_to_next(sprint_id: int) -> Optional[Dict[str, Any]]:
+        db = get_db()
+        
+        sprint = SprintService.get_by_id(sprint_id)
+        if not sprint:
+            return None
+        
+        projeto_id = sprint.get("projeto_id")
+        
+        next_sprint = db.table("sprints").select("*").eq("empresa_id", sprint["empresa_id"]).eq("status", "planejada")
+        
+        if projeto_id:
+            next_sprint = next_sprint.eq("projeto_id", projeto_id)
+        
+        next_sprint = next_sprint.gt("ordem", sprint.get("ordem", 0)).order("ordem").limit(1).execute()
+        
+        if not next_sprint.data:
+            return None
+        
+        next_sprint_data = next_sprint.data[0]
+        
+        tarefas_incompletas = db.table("tarefas").select("*").eq("sprint_id", sprint_id).execute()
+        
+        for tarefa in tarefas_incompletas.data:
+            if tarefa.get("coluna") != "done":
+                db.table("tarefas").update({"sprint_id": next_sprint_data["id"]}).eq("id", tarefa["id"]).execute()
+        
+        return next_sprint_data
