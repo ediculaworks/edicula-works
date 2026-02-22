@@ -536,7 +536,7 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
   const handleSave = () => {
     onSave({
       ...formData,
-      responsaveis: selectedResponsaveis.map(Number),
+      responsaveis: selectedResponsaveis,
       updated_at: new Date().toISOString()
     })
   }

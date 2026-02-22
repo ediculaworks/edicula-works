@@ -8,48 +8,47 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Users, Pencil, Trash2, X } from "lucide-react"
 import { api } from "@/lib/api"
-import { cn } from "@/lib/utils"
 
 const EMPRESA_ID = 1
 
-interface Membro {
+interface Usuario {
   id: string
   nome: string
   email: string
   avatar_url?: string
 }
 
-export default function MembrosPage() {
-  const [membros, setMembros] = useState<Membro[]>([])
+export default function UsuariosPage() {
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
-  const [editingMembro, setEditingMembro] = useState<Membro | null>(null)
+  const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null)
   const [formNome, setFormNome] = useState("")
   const [formEmail, setFormEmail] = useState("")
 
-  const fetchMembros = async () => {
+  const fetchUsuarios = async () => {
     try {
       setLoading(true)
       const data = await api.getUsuarios({ empresa_id: EMPRESA_ID })
-      setMembros(data)
+      setUsuarios(data)
     } catch (err) {
-      console.error("Erro ao carregar membros:", err)
+      console.error("Erro ao carregar usuários:", err)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchMembros()
+    fetchUsuarios()
   }, [])
 
-  const handleOpenModal = (membro?: Membro) => {
-    if (membro) {
-      setEditingMembro(membro)
-      setFormNome(membro.nome)
-      setFormEmail(membro.email)
+  const handleOpenModal = (usuario?: Usuario) => {
+    if (usuario) {
+      setEditingUsuario(usuario)
+      setFormNome(usuario.nome)
+      setFormEmail(usuario.email)
     } else {
-      setEditingMembro(null)
+      setEditingUsuario(null)
       setFormNome("")
       setFormEmail("")
     }
@@ -58,7 +57,7 @@ export default function MembrosPage() {
 
   const handleCloseModal = () => {
     setShowModal(false)
-    setEditingMembro(null)
+    setEditingUsuario(null)
     setFormNome("")
     setFormEmail("")
   }
@@ -67,8 +66,8 @@ export default function MembrosPage() {
     e.preventDefault()
     
     try {
-      if (editingMembro) {
-        await api.updateUsuario(editingMembro.id, {
+      if (editingUsuario) {
+        await api.updateUsuario(editingUsuario.id, {
           nome: formNome,
           email: formEmail,
         })
@@ -80,21 +79,21 @@ export default function MembrosPage() {
           role: "member",
         })
       }
-      await fetchMembros()
+      await fetchUsuarios()
       handleCloseModal()
     } catch (err) {
-      console.error("Erro ao salvar membro:", err)
+      console.error("Erro ao salvar usuário:", err)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este membro?")) return
+    if (!confirm("Tem certeza que deseja excluir este usuário?")) return
     
     try {
       await api.deleteUsuario(id)
-      await fetchMembros()
+      await fetchUsuarios()
     } catch (err) {
-      console.error("Erro ao excluir membro:", err)
+      console.error("Erro ao excluir usuário:", err)
     }
   }
 
@@ -104,18 +103,18 @@ export default function MembrosPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Membros</h1>
+            <h1 className="text-2xl font-bold">Usuários</h1>
             <p className="text-sm text-[var(--foreground)]/60">
-              Gerencie os membros da equipe
+              Gerencie os usuários do sistema
             </p>
           </div>
           <Button className="glow-button" onClick={() => handleOpenModal()}>
             <Plus className="mr-2 h-4 w-4" />
-            Novo Membro
+            Novo Usuário
           </Button>
         </div>
 
-        {/* Members Grid */}
+        {/* Users Grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
@@ -126,36 +125,36 @@ export default function MembrosPage() {
               </div>
             ))}
           </div>
-        ) : membros.length === 0 ? (
+        ) : usuarios.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="h-20 w-20 rounded-full bg-[var(--surface-hover)] flex items-center justify-center mb-4">
               <Users className="h-10 w-10 text-[var(--foreground)]/30" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Nenhum membro encontrado</h3>
+            <h3 className="text-lg font-semibold mb-2">Nenhum usuário encontrado</h3>
             <p className="text-sm text-[var(--foreground)]/50 mb-4">
-              Comece adicionando membros da sua equipe
+              Comece adicionando usuários ao sistema
             </p>
             <Button className="glow-button" onClick={() => handleOpenModal()}>
               <Plus className="mr-2 h-4 w-4" />
-              Adicionar Membro
+              Adicionar Usuário
             </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {membros.map((membro) => (
+            {usuarios.map((usuario) => (
               <div
-                key={membro.id}
+                key={usuario.id}
                 className="bento-item p-4 hover:border-[var(--border-hover)] transition-colors cursor-pointer group"
-                onClick={() => handleOpenModal(membro)}
+                onClick={() => handleOpenModal(usuario)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-12 w-12 rounded-full bg-[var(--primary)] flex items-center justify-center text-white font-medium text-lg">
-                      {membro.nome.charAt(0).toUpperCase()}
+                      {usuario.nome.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="font-semibold">{membro.nome}</h3>
-                      <p className="text-sm text-[var(--foreground)]/60">{membro.email}</p>
+                      <h3 className="font-semibold">{usuario.nome}</h3>
+                      <p className="text-sm text-[var(--foreground)]/60">{usuario.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -163,7 +162,7 @@ export default function MembrosPage() {
                       className="p-1 hover:bg-[var(--surface-hover)] rounded"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleOpenModal(membro)
+                        handleOpenModal(usuario)
                       }}
                     >
                       <Pencil className="h-4 w-4" />
@@ -172,7 +171,7 @@ export default function MembrosPage() {
                       className="p-1 hover:bg-[var(--surface-hover)] rounded text-[var(--error)]"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleDelete(membro.id)
+                        handleDelete(usuario.id)
                       }}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -204,7 +203,7 @@ export default function MembrosPage() {
             >
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
-                  {editingMembro ? 'Editar Membro' : 'Novo Membro'}
+                  {editingUsuario ? 'Editar Usuário' : 'Novo Usuário'}
                 </h3>
                 <Button variant="ghost" size="icon" onClick={handleCloseModal}>
                   <X className="h-4 w-4" />
@@ -219,7 +218,7 @@ export default function MembrosPage() {
                   <Input
                     value={formNome}
                     onChange={(e) => setFormNome(e.target.value)}
-                    placeholder="Nome do membro"
+                    placeholder="Nome do usuário"
                     required
                   />
                 </div>

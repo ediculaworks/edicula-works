@@ -56,8 +56,8 @@ export interface Tarefa {
   prazo?: string
   data_conclusao?: string
   tempo_gasto_minutos: number
-  responsaveis: number[]
-  created_by?: number
+  responsaveis: string[]
+  created_by?: string
   cliente_nome?: string
   tarefa_pai_id?: number
   eh_subtarefa: boolean
@@ -68,7 +68,7 @@ export interface Tarefa {
   status: StatusTarefa
   sprint_id?: number
   grupo_id?: number
-  observadores: number[]
+  observadores: string[]
   previsao_entrega?: string
   estimativa_horas_prevista?: number
   data_inicio?: string

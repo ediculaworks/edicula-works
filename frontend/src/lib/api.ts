@@ -67,6 +67,9 @@ export const api = {
 
   async createTarefa(data: Partial<Tarefa>) {
     const cleanData = removeUndefined(data)
+    if (cleanData.responsaveis) {
+      cleanData.responsaveis = cleanData.responsaveis.map(String)
+    }
     const response = await fetch(`${API_BASE}/tarefas`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -77,6 +80,9 @@ export const api = {
 
   async updateTarefa(id: number, data: Partial<Tarefa>) {
     const cleanData = removeUndefined(data)
+    if (cleanData.responsaveis) {
+      cleanData.responsaveis = cleanData.responsaveis.map(String)
+    }
     const response = await fetch(`${API_BASE}/tarefas/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

@@ -758,7 +758,7 @@ function TarefaModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCr
   const handleSave = () => {
     onSave({
       ...formData,
-      responsaveis: selectedResponsaveis.map(Number),
+      responsaveis: selectedResponsaveis,
       updated_at: new Date().toISOString()
     })
   }
