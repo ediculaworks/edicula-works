@@ -75,7 +75,7 @@ interface Filtros {
   prioridade?: Prioridade
   status?: StatusTarefa
   sprintId?: number
-  membroId?: number
+  membroId?: string
 }
 
 interface ContextMenuProps {
@@ -430,7 +430,7 @@ export default function TarefasPage() {
                   onChange={(e) => {
                     setFiltros((prev) => ({ 
                       ...prev, 
-                      membroId: e.target.value ? Number(e.target.value) : undefined 
+                      membroId: e.target.value || undefined 
                     }))
                     setPage(1)
                   }}
