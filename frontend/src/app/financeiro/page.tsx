@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton, CardSkeleton, ListItemSkeleton, StatsSkeleton } from "@/components/ui/skeleton"
 import { useProjetos } from "@/hooks/useProjetos"
+import { useUsuarios } from "@/hooks/useUsuarios"
 import { 
   Plus, 
   Receipt, 
@@ -52,6 +53,7 @@ interface Transacao {
   status: 'pendente' | 'pago' | 'cancelado' | 'estornado'
   conta_bancaria_id?: number
   projeto_id?: number
+  membro_id?: number
   created_at: string
 }
 
@@ -69,11 +71,13 @@ export default function FinanceiroPage() {
   const [filterStatus, setFilterStatus] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingTransacao, setEditingTransacao] = useState<Transacao | null>(null)
+  const [filterMembro, setFilterMembro] = useState<string>("")
   const { projetos } = useProjetos({ empresaId: EMPRESA_ID })
+  const { usuarios } = useUsuarios({ empresaId: EMPRESA_ID })
 
   useEffect(() => {
     fetchTransacoes()
-  }, [filterTipo, filterStatus])
+  }, [filterTipo, filterStatus, filterMembro])
 
   const fetchTransacoes = async () => {
     try {
@@ -126,6 +130,27 @@ export default function FinanceiroPage() {
     { name: 'Despesas', value: despesas, color: '#ef4444' },
   ]
 
+  const estatisticasMembros = usuarios.map(usuario => {
+    const transacoesMembro = transacoes.filter(t => t.membro_id === Number(usuario.id))
+    const receitasMembro = transacoesMembro
+      .filter(t => t.tipo === 'receita' && t.status === 'pago')
+      .reduce((sum, t) => sum + t.valor, 0)
+    const pendentesMembro = transacoesMembro
+      .filter(t => t.tipo === 'receita' && t.status === 'pendente')
+      .reduce((sum, t) => sum + t.valor, 0)
+    const totalReceber = receitasMembro + pendentesMembro
+    const percentualRecebido = totalReceber > 0 ? Math.round((receitasMembro / totalReceber) * 100) : 0
+    
+    return {
+      id: usuario.id,
+      nome: usuario.nome,
+      receitas: receitasMembro,
+      pendentes: pendentesMembro,
+      totalReceber,
+      percentualRecebido,
+    }
+  }).filter(m => m.totalReceber > 0)
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
   }
@@ -135,6 +160,7 @@ export default function FinanceiroPage() {
     const formData = new FormData(e.currentTarget)
     
     const projetoId = formData.get('projeto_id')
+    const membroId = formData.get('membro_id')
     
     const data: any = {
       empresa_id: EMPRESA_ID,
@@ -148,6 +174,10 @@ export default function FinanceiroPage() {
 
     if (projetoId && projetoId !== '') {
       data.projeto_id = parseInt(projetoId as string)
+    }
+
+    if (membroId && membroId !== '') {
+      data.membro_id = parseInt(membroId as string)
     }
 
     try {
@@ -341,7 +371,60 @@ export default function FinanceiroPage() {
             <option value="cancelado">Cancelado</option>
             <option value="estornado">Estornado</option>
           </select>
+          <select
+            value={filterMembro}
+            onChange={(e) => setFilterMembro(e.target.value)}
+            className="px-4 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]"
+          >
+            <option value="">Todos os membros</option>
+            {usuarios.map(u => (
+              <option key={u.id} value={u.id}>{u.nome}</option>
+            ))}
+          </select>
         </div>
+
+        {/* Membro Statistics */}
+        {estatisticasMembros.length > 0 && !filterMembro && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {estatisticasMembros.map(membro => (
+              <div key={membro.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-full bg-[var(--primary)] flex items-center justify-center text-white font-medium">
+                    {membro.nome.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{membro.nome}</h3>
+                    <p className="text-xs text-[var(--foreground)]/60">
+                      {membro.percentualRecebido}% recebido
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-green-500/10 rounded-lg p-3">
+                    <p className="text-xs text-green-500 mb-1">Recebido</p>
+                    <p className="font-bold text-green-500">{formatCurrency(membro.receitas)}</p>
+                  </div>
+                  <div className="bg-yellow-500/10 rounded-lg p-3">
+                    <p className="text-xs text-yellow-500 mb-1">Pendente</p>
+                    <p className="font-bold text-yellow-500">{formatCurrency(membro.pendentes)}</p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-[var(--foreground)]/60">Progresso</span>
+                    <span className="font-medium">{membro.percentualRecebido}%</span>
+                  </div>
+                  <div className="h-2 bg-[var(--border)] rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: `${membro.percentualRecebido}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Transactions List */}
         {loading ? (
@@ -483,6 +566,19 @@ export default function FinanceiroPage() {
                   <option value="">Nenhum projeto</option>
                   {projetos.map(p => (
                     <option key={p.id} value={p.id}>{p.nome}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Membro</label>
+                <select 
+                  name="membro_id" 
+                  defaultValue={editingTransacao?.membro_id || ''}
+                  className="w-full px-4 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]"
+                >
+                  <option value="">Nenhum membro</option>
+                  {usuarios.map(u => (
+                    <option key={u.id} value={u.id}>{u.nome}</option>
                   ))}
                 </select>
               </div>

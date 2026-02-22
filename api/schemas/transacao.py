@@ -58,6 +58,7 @@ class TransacaoCreate(BaseModel):
     fornecedor_id: Optional[int] = None
     cliente_id: Optional[int] = None
     pessoa_nome: Optional[str] = None
+    membro_id: Optional[int] = None
     
     observacoes: Optional[str] = None
     tags: Optional[List[str]] = []
@@ -100,6 +101,8 @@ class TransacaoUpdate(BaseModel):
     
     fornecedor_id: Optional[int] = None
     cliente_id: Optional[int] = None
+    pessoa_nome: Optional[str] = None
+    membro_id: Optional[int] = None
     
     observacoes: Optional[str] = None
     tags: Optional[List[str]] = None
@@ -147,6 +150,7 @@ class TransacaoResponse(BaseModel):
     fornecedor_id: Optional[int]
     cliente_id: Optional[int]
     pessoa_nome: Optional[str]
+    membro_id: Optional[int]
     
     observacoes: Optional[str]
     tags: Optional[List[str]] = []
