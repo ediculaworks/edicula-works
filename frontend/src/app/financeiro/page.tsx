@@ -134,7 +134,9 @@ export default function FinanceiroPage() {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     
-    const data = {
+    const projetoId = formData.get('projeto_id')
+    
+    const data: any = {
       empresa_id: EMPRESA_ID,
       tipo: formData.get('tipo'),
       valor: parseFloat(formData.get('valor') as string),
@@ -142,6 +144,10 @@ export default function FinanceiroPage() {
       data_transacao: formData.get('data_transacao'),
       data_vencimento: formData.get('data_vencimento'),
       status: formData.get('status'),
+    }
+
+    if (projetoId && projetoId !== '') {
+      data.projeto_id = parseInt(projetoId as string)
     }
 
     try {
