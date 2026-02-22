@@ -43,6 +43,10 @@ async def criar_contrato(contrato: ContratoCreate) -> Dict[str, Any]:
     
     data = contrato.model_dump()
     
+    for key, value in data.items():
+        if isinstance(value, date):
+            data[key] = value.isoformat()
+    
     data["embedding"] = None
     
     result = db.table("contratos").insert(data).execute()
@@ -54,6 +58,10 @@ async def atualizar_contrato(contrato_id: int, contrato: ContratoUpdate, empresa
     db = get_db()
     
     data = contrato.model_dump(exclude_unset=True)
+    
+    for key, value in data.items():
+        if isinstance(value, date):
+            data[key] = value.isoformat()
     
     if data:
         data["updated_at"] = datetime.utcnow().isoformat()
