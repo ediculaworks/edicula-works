@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -127,10 +128,12 @@ export default function CalendarioPage() {
               Visualize eventos e prazos das tarefas
             </p>
           </div>
-          <Button className="glow-button">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Evento
-          </Button>
+          <Link href="/tarefas">
+            <Button className="glow-button">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Evento
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

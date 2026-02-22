@@ -12,8 +12,6 @@ import {
   Wallet,
   FolderKanban,
   Calendar,
-  Activity,
-  Settings,
   Bot,
   Users,
   X,
@@ -33,8 +31,6 @@ const navItems = [
   { href: "/contratos", label: "Contratos", icon: FileText },
   { href: "/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/calendario", label: "Calendário", icon: Calendar },
-  { href: "/monitor", label: "Monitor", icon: Activity },
-  { href: "/settings", label: "Configurações", icon: Settings },
 ]
 
 export function Sidebar() {
