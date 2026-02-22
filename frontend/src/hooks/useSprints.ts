@@ -41,11 +41,45 @@ export function useSprints(options: UseSprintsOptions = {}) {
     return sprints.find(s => s.id === id)
   }, [sprints])
 
+  const createSprint = useCallback(async (data: Partial<Sprint>) => {
+    const novoSprint = await api.createSprint({ ...data, empresa_id: empresaId })
+    setSprints(prev => [...prev, novoSprint])
+    return novoSprint
+  }, [empresaId])
+
+  const updateSprint = useCallback(async (id: number, data: Partial<Sprint>) => {
+    const atualizado = await api.updateSprint(id, data)
+    setSprints(prev => prev.map(s => s.id === id ? atualizado : s))
+    return atualizado
+  }, [])
+
+  const deleteSprint = useCallback(async (id: number) => {
+    await api.deleteSprint(id)
+    setSprints(prev => prev.filter(s => s.id !== id))
+  }, [])
+
+  const iniciarSprint = useCallback(async (id: number) => {
+    const atualizado = await api.iniciarSprint(id)
+    setSprints(prev => prev.map(s => s.id === id ? atualizado : s))
+    return atualizado
+  }, [])
+
+  const concluirSprint = useCallback(async (id: number) => {
+    const atualizado = await api.concluirSprint(id)
+    setSprints(prev => prev.map(s => s.id === id ? atualizado : s))
+    return atualizado
+  }, [])
+
   return {
     sprints,
     loading,
     error,
     refetch: fetchSprints,
     getSprintById,
+    createSprint,
+    updateSprint,
+    deleteSprint,
+    iniciarSprint,
+    concluirSprint,
   }
 }

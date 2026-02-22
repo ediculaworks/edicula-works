@@ -19,6 +19,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Flag,
 } from "lucide-react"
 
 const navItems = [
@@ -27,6 +28,7 @@ const navItems = [
   { href: "/usuarios", label: "Usuários", icon: Users },
   { href: "/kanban", label: "Kanban", icon: Kanban },
   { href: "/tarefas", label: "Tarefas", icon: ListTodo },
+  { href: "/sprints", label: "Sprints", icon: Flag },
   { href: "/projetos", label: "Projetos", icon: FolderKanban },
   { href: "/contratos", label: "Contratos", icon: FileText },
   { href: "/financeiro", label: "Financeiro", icon: Wallet },
