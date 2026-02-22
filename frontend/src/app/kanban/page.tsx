@@ -949,7 +949,7 @@ export default function KanbanPage() {
     setActiveId(event.active.id as number)
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
 
     if (!over) {
@@ -972,6 +972,11 @@ export default function KanbanPage() {
         )
       )
       setPages((prev) => ({ ...prev, [overColumn.id]: 1 }))
+      
+      if (activeTarefa.coluna !== overColumn.id) {
+        await moveTarefa(activeTarefa.id, overColumn.id)
+      }
+      
       setActiveId(null)
       return
     }
@@ -984,6 +989,8 @@ export default function KanbanPage() {
         )
       )
       setPages((prev) => ({ ...prev, [overTarefa.coluna]: 1 }))
+      
+      await moveTarefa(activeTarefa.id, overTarefa.coluna)
     }
 
     setActiveId(null)
@@ -1061,15 +1068,19 @@ export default function KanbanPage() {
   }
 
   const handleStart = async (tarefa: Tarefa) => {
+    const newColumn = tarefa.coluna === "todo" ? "in_progress" : tarefa.coluna
     if (isApiConnected) {
       try {
         await iniciarTarefa(tarefa.id)
+        if (tarefa.coluna === "todo") {
+          await moveTarefa(tarefa.id, "in_progress")
+        }
       } catch (err) {
         console.error('Erro ao iniciar:', err)
-        setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "ativa" } : t))
+        setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "ativa", coluna: newColumn } : t))
       }
     } else {
-      setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "ativa" } : t))
+      setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "ativa", coluna: newColumn } : t))
     }
   }
 
@@ -1103,12 +1114,15 @@ export default function KanbanPage() {
     if (isApiConnected) {
       try {
         await abandonarTarefa(tarefa.id)
+        if (tarefa.coluna !== "todo") {
+          await moveTarefa(tarefa.id, "todo")
+        }
       } catch (err) {
         console.error('Erro ao abandonar:', err)
-        setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "abandonada" } : t))
+        setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "abandonada", coluna: "todo" } : t))
       }
     } else {
-      setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "abandonada" } : t))
+      setTarefas(prev => prev.map(t => t.id === tarefa.id ? { ...t, status: "abandonada", coluna: "todo" } : t))
     }
   }
 
