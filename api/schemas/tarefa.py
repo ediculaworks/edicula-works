@@ -41,7 +41,7 @@ class TarefaCreate(BaseModel):
     
     prazo: Optional[date] = None
     
-    responsaveis: Optional[List[int]] = []
+    responsaveis: Optional[List[str]] = []
     cliente_nome: Optional[str] = None
     
     tarefa_pai_id: Optional[int] = None
@@ -77,7 +77,7 @@ class TarefaUpdate(BaseModel):
     prazo: Optional[date] = None
     data_conclusao: Optional[datetime] = None
     
-    responsaveis: Optional[List[int]] = None
+    responsaveis: Optional[List[str]] = None
     cliente_nome: Optional[str] = None
     
     tarefa_pai_id: Optional[int] = None
@@ -123,7 +123,7 @@ class TarefaResponse(BaseModel):
     data_conclusao: Optional[datetime]
     tempo_gasto_minutos: int
     
-    responsaveis: List[int]
+    responsaveis: List[str]
     created_by: Optional[int]
     cliente_nome: Optional[str]
     
