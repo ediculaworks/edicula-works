@@ -19,8 +19,11 @@ import {
   AlertTriangle,
   Edit,
   Clock,
+  Upload,
+  Download,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api"
 
 const EMPRESA_ID = 1
 
@@ -39,6 +42,7 @@ interface Contrato {
   status: 'rascunho' | 'ativo' | 'expirado' | 'encerrado' | 'cancelado'
   renovacao_automatica: boolean
   periodicidade?: string
+  arquivo_url?: string
   created_at: string
 }
 
@@ -167,6 +171,17 @@ export default function ContratosPage() {
       }
     } catch (error) {
       console.error("Erro ao deletar contrato:", error)
+    }
+  }
+
+  const handleUploadArquivo = async (contratoId: number, file: File) => {
+    try {
+      const result = await api.uploadContratoArquivo(contratoId, file, EMPRESA_ID)
+      fetchContratos()
+      return result
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error)
+      throw error
     }
   }
 
@@ -300,6 +315,20 @@ export default function ContratosPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </button>
+                        <label className="p-1 hover:bg-[var(--surface-hover)] rounded cursor-pointer text-blue-500">
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0]
+                              if (file) {
+                                await handleUploadArquivo(contrato.id, file)
+                              }
+                            }}
+                          />
+                          <Upload className="h-4 w-4" />
+                        </label>
                         <button 
                           className="p-1 hover:bg-[var(--surface-hover)] rounded text-red-500"
                           onClick={(e) => { e.stopPropagation(); handleDeleteContrato(contrato.id) }}
@@ -335,6 +364,18 @@ export default function ContratosPage() {
                         <Clock className="h-3 w-3" />
                         Renovação automática
                       </div>
+                    )}
+                    {contrato.arquivo_url && (
+                      <a 
+                        href={contrato.arquivo_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-[var(--primary)] hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Download className="h-3 w-3" />
+                        Baixar arquivo
+                      </a>
                     )}
                   </div>
                 </div>

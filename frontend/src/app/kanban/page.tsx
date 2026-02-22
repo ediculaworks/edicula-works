@@ -43,12 +43,13 @@ import {
   RefreshCw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Tarefa, Prioridade, ColunaKanban, StatusTarefa, Usuario, Grupo, Sprint, Tag as TagType } from "@/types"
+import type { Tarefa, Prioridade, ColunaKanban, StatusTarefa, Usuario, Grupo, Sprint, Tag as TagType, Projeto } from "@/types"
 import { useTarefas } from "@/hooks/useTarefas"
 import { useUsuarios } from "@/hooks/useUsuarios"
 import { useTags } from "@/hooks/useTags"
 import { useGrupos } from "@/hooks/useGrupos"
 import { useSprints } from "@/hooks/useSprints"
+import { useProjetos } from "@/hooks/useProjetos"
 
 const EMPRESA_ID = 1
 
@@ -486,9 +487,10 @@ interface TaskModalProps {
   grupos: Grupo[]
   sprints: Sprint[]
   tags: TagType[]
+  projetos: Projeto[]
 }
 
-function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags }: TaskModalProps) {
+function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCreating = false, initialColumn = "todo", editMode = false, usuarios, grupos, sprints, tags, projetos }: TaskModalProps) {
   const [editModeState, setEditModeState] = useState(isCreating || editMode)
   const [selectedResponsaveis, setSelectedResponsaveis] = useState<string[]>(() => {
     if (isCreating) return []
@@ -515,6 +517,7 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
         responsaveis: [],
         tags: [],
         sprint_id: undefined,
+        projeto_id: undefined,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         tempo_gasto_minutos: 0,
@@ -699,6 +702,19 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
 
             <div className="grid grid-cols-2 gap-4">
               <div>
+                <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Projeto</label>
+                <select
+                  value={formData.projeto_id || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, projeto_id: e.target.value ? Number(e.target.value) : undefined }))}
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2 text-sm"
+                >
+                  <option value="">Selecione...</option>
+                  {projetos.map(p => (
+                    <option key={p.id} value={p.id}>{p.nome}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Sprint</label>
                 <select
                   value={formData.sprint_id || ""}
@@ -711,6 +727,9 @@ function TaskModal({ tarefa, onClose, onSave, onStart, onPause, onFinish, isCrea
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-medium text-[var(--foreground)]/60 mb-1 block">Estimativa (horas)</label>
                 <Input
@@ -883,6 +902,7 @@ export default function KanbanPage() {
   const { tags, getTagById } = useTags({ empresaId: EMPRESA_ID })
   const { grupos, getGrupoById } = useGrupos({ empresaId: EMPRESA_ID })
   const { sprints } = useSprints({ empresaId: EMPRESA_ID })
+  const { projetos } = useProjetos({ empresaId: EMPRESA_ID })
   
   const [tarefas, setTarefas] = useState<Tarefa[]>([])
   const [activeId, setActiveId] = useState<number | null>(null)
@@ -1284,6 +1304,7 @@ export default function KanbanPage() {
             grupos={grupos}
             sprints={sprints}
             tags={tags}
+            projetos={projetos}
           />
         )}
       </AnimatePresence>

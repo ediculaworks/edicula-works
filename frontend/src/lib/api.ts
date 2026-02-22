@@ -265,6 +265,17 @@ export const api = {
     return handleResponse<Contrato[]>(response)
   },
 
+  async uploadContratoArquivo(contratoId: number, arquivo: File, empresaId: number = 1) {
+    const formData = new FormData()
+    formData.append('arquivo', arquivo)
+    
+    const response = await fetch(`${API_BASE}/contratos/${contratoId}/upload?empresa_id=${empresaId}`, {
+      method: 'POST',
+      body: formData,
+    })
+    return handleResponse<{ url: string; filename: string }>(response)
+  },
+
   // Usuarios
   async getUsuarios(params?: {
     empresa_id?: number
