@@ -17,7 +17,9 @@ import {
   Flag,
   X,
   AlertCircle,
+  History,
 } from "lucide-react"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 
 const EMPRESA_ID = 1
@@ -137,10 +139,18 @@ export default function SprintsPage() {
             <h1 className="text-2xl font-bold">Sprints</h1>
             <p className="text-[var(--foreground)]/60">Gerencie seus sprints e acompanhe o progresso</p>
           </div>
-          <Button onClick={() => handleOpenModal()} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nova Sprint
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link href="/sprints/historico">
+              <Button variant="outline" className="gap-2">
+                <History className="h-4 w-4" />
+                Histórico
+              </Button>
+            </Link>
+            <Button onClick={() => handleOpenModal()} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nova Sprint
+            </Button>
+          </div>
         </div>
 
         {/* Sprint Ativa */}
