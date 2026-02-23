@@ -202,3 +202,37 @@ export interface Tag {
   created_at: string
   updated_at: string
 }
+
+export type TipoEvento = 'reuniao' | 'visita' | 'daily' | 'evento' | 'outro'
+export type Recorrencia = 'diaria' | 'semanal' | 'mensal' | null
+
+export interface Participante {
+  id: string
+  evento_id: string
+  membro_id: string
+  status: 'confirmado' | 'pendente' | 'recusado'
+  created_at: string
+}
+
+export interface Evento {
+  id: string
+  empresa_id: number
+  titulo: string
+  descricao?: string
+  tipo: TipoEvento
+  data_inicio: string
+  data_fim?: string
+  hora_inicio?: string
+  hora_fim?: string
+  local?: string
+  link_reuniao?: string
+  recurrencia?: Recorrencia
+  fim_recorrencia?: string
+  dia_semana_recorrencia?: number
+  cor: string
+  tarefa_id?: number
+  participantes: Participante[]
+  criado_por?: number
+  created_at: string
+  updated_at: string
+}

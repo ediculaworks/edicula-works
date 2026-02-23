@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from api.routes import health, system
-from api.routes import projetos, tarefas, grupos, sprints, tags, usuarios, contratos, transacoes, search, chat
+from api.routes import projetos, tarefas, grupos, sprints, tags, usuarios, contratos, transacoes, search, chat, eventos
 
 
 app = FastAPI(
@@ -37,6 +37,7 @@ app.include_router(tags.router, prefix="/api/tags", tags=["Tags"])
 app.include_router(usuarios.router, prefix="/api/usuarios", tags=["Usuarios"])
 app.include_router(contratos.router, prefix="/api/contratos", tags=["Contratos"])
 app.include_router(transacoes.router, prefix="/api/transacoes", tags=["Transacoes"])
+app.include_router(eventos.router, prefix="/api/eventos", tags=["Eventos"])
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 

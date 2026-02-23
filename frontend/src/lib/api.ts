@@ -414,12 +414,81 @@ export const api = {
     const response = await fetch(`${API_BASE}/system/health`)
     return handleResponse<SystemHealth>(response)
   },
+
+  // Eventos
+  async getEventos(params?: {
+    empresa_id?: number
+    tipo?: string
+    data_inicio?: string
+    data_fim?: string
+    membro_id?: string
+  }) {
+    const searchParams = new URLSearchParams()
+    if (params?.empresa_id) searchParams.set('empresa_id', params.empresa_id.toString())
+    if (params?.tipo) searchParams.set('tipo', params.tipo)
+    if (params?.data_inicio) searchParams.set('data_inicio', params.data_inicio)
+    if (params?.data_fim) searchParams.set('data_fim', params.data_fim)
+    if (params?.membro_id) searchParams.set('membro_id', params.membro_id)
+    
+    const url = `${API_BASE}/eventos${searchParams.toString() ? '?' + searchParams : ''}`
+    const response = await fetch(url)
+    return handleResponse<Evento[]>(response)
+  },
+
+  async getEventosDoDia(data: string, empresaId: number = 1) {
+    const response = await fetch(`${API_BASE}/eventos/dia/${data}?empresa_id=${empresaId}`)
+    return handleResponse<Evento[]>(response)
+  },
+
+  async getTimeline(inicio: string, fim: string, empresaId: number = 1, membroId?: string) {
+    const params = new URLSearchParams({
+      inicio,
+      fim,
+      empresa_id: empresaId.toString()
+    })
+    if (membroId) params.set('membro_id', membroId)
+    
+    const response = await fetch(`${API_BASE}/eventos/timeline?${params}`)
+    return handleResponse<Evento[]>(response)
+  },
+
+  async getEvento(eventoId: string, empresaId: number = 1) {
+    const response = await fetch(`${API_BASE}/eventos/${eventoId}?empresa_id=${empresaId}`)
+    return handleResponse<Evento>(response)
+  },
+
+  async createEvento(data: Partial<Evento>) {
+    const response = await fetch(`${API_BASE}/eventos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Evento>(response)
+  },
+
+  async updateEvento(eventoId: string, data: Partial<Evento>, empresaId: number = 1) {
+    const response = await fetch(`${API_BASE}/eventos/${eventoId}?empresa_id=${empresaId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Evento>(response)
+  },
+
+  async deleteEvento(eventoId: string, empresaId: number = 1) {
+    const response = await fetch(`${API_BASE}/eventos/${eventoId}?empresa_id=${empresaId}`, {
+      method: 'DELETE',
+    })
+    if (response.status !== 204) {
+      throw new Error('Erro ao deletar evento')
+    }
+  },
 }
 
 // Types inline (importados do types/index)
-import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, ColunaKanban, Usuario, Tag } from '@/types'
+import type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, ColunaKanban, Usuario, Tag, Evento } from '@/types'
 
-export type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, Usuario, Tag }
+export type { Tarefa, Contrato, Projeto, Transacao, Conversa, Mensagem, Grupo, Sprint, Usuario, Tag, Evento }
 
 export interface SystemStats {
   cpu: { percent: number; count: number }
