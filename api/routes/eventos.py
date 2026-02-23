@@ -8,7 +8,7 @@ from api.schemas.evento import (
     ParticipanteCreate,
     ParticipanteResponse
 )
-from api.services import eventos as evento_service
+from api.services.eventos import EventoService as evento_service
 
 router = APIRouter()
 
